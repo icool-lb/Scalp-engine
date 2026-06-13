@@ -1,0 +1,564 @@
+<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/><title>XAU/BTC/XAG Scalp Engine V11.11</title><link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;800;900&family=JetBrains+Mono:wght@700;900&display=swap" rel="stylesheet"><style>
+:root{--bg:#eef2f7;--p:#f8fafc;--w:#fff;--ink:#0f172a;--m:#64748b;--ln:#cbd5e1;--g:#16a34a;--r:#dc2626;--y:#f59e0b;--b:#2563eb;--c:#0891b2;--v:#7c3aed;--sh:0 10px 30px rgba(15,23,42,.12)}*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:Cairo,sans-serif;color:var(--ink);overflow:hidden}button,input,select{font-family:inherit}.app{height:100vh;display:grid;grid-template-rows:auto 1fr}.top{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;background:#f8fafc;border-bottom:1px solid var(--ln);box-shadow:var(--sh);padding:10px 14px;z-index:2}.brand{direction:ltr;display:flex;gap:10px;align-items:center}.logo{width:46px;height:46px;border-radius:15px;display:grid;place-items:center;background:linear-gradient(135deg,#fff7ed,#facc15);font-size:25px;font-weight:900;color:#92400e;border:1px solid #fde68a}.brand h1{margin:0;font-size:17px;font-weight:900;line-height:1.05}.brand p{margin:4px 0 0;color:var(--m);font-size:11px}.px{text-align:center}.big{font:900 38px "JetBrains Mono";letter-spacing:1px}.ba{font:800 12px "JetBrains Mono"}.bid{color:var(--g)}.ask{color:var(--r)}.spr{color:var(--m)}.ctrl{display:flex;gap:7px;align-items:center;justify-content:flex-start;flex-wrap:wrap}.status{height:36px;border:1px solid var(--ln);border-radius:18px;background:#fff;padding:0 12px;display:flex;align-items:center;gap:8px;font-weight:900;font-size:12px;direction:ltr}.dot{width:10px;height:10px;border-radius:50%;background:var(--m)}.live .dot{background:var(--g);box-shadow:0 0 12px var(--g)}.warn .dot{background:var(--y);box-shadow:0 0 12px var(--y)}.err .dot{background:var(--r);box-shadow:0 0 12px var(--r)}select,.btn,.tool,.tf{height:38px;border:1px solid var(--ln);background:#fff;border-radius:15px;padding:0 11px;font-weight:900;color:var(--ink)}.tf.active,.btn.gold,.tool.on{background:#f8c65a;border-color:#f59e0b}.grid{height:100%;display:grid;grid-template-columns:300px minmax(430px,1fr) 320px;gap:10px;padding:10px;overflow:hidden}.panel{background:var(--p);border:1px solid var(--ln);border-radius:18px;box-shadow:var(--sh);overflow:auto}.side{padding:12px}.card{background:#fff;border:1px solid var(--ln);border-radius:16px;padding:12px;margin-bottom:10px}.card h2,.card h3{font-size:14px;margin:0 0 8px;font-weight:900}.score{display:grid;grid-template-columns:1fr 1fr;gap:8px}.metric{background:#f1f5f9;border:1px solid var(--ln);border-radius:14px;padding:8px}.metric b{display:block;font:900 18px "JetBrains Mono"}.metric span{font-size:11px;color:var(--m)}.line,.school{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0;border-bottom:1px dashed var(--ln)}.line span,.school .n{color:var(--m)}.tag{min-width:76px;padding:5px 8px;border-radius:999px;font:900 11px "JetBrains Mono";text-align:center}.buy{background:#dcfce7;color:#166534}.sell{background:#fee2e2;color:#991b1b}.range{background:#fef3c7;color:#92400e}.decision{font:900 44px "JetBrains Mono";color:var(--y)}.alert{border:1px solid #f59e0b;background:#fffbeb;border-radius:14px;padding:10px;font-weight:800;font-size:13px}.chartPanel{display:grid;grid-template-rows:auto auto 1fr 132px;background:#f8fafc;overflow:hidden;position:relative}.toolbar{display:flex;gap:7px;align-items:center;flex-wrap:wrap;padding:8px;border-bottom:1px solid var(--ln);background:#eef2f7;direction:ltr}.tool{height:34px;background:#dbeafe;border-color:#bfdbfe}.tool.warn{background:#fef3c7;border-color:#f59e0b}.wrap{position:relative;overflow:hidden}.overlay{position:absolute;top:12px;left:12px;min-width:250px;background:rgba(255,255,255,.94);border:1px solid #94a3b8;border-radius:14px;padding:9px 12px;box-shadow:var(--sh);direction:ltr}.overlay .sig{font:900 17px "JetBrains Mono"}.overlay .why{font-size:12px;color:#334155;margin-top:4px;direction:rtl;text-align:right}.nodata{position:absolute;inset:60px 20px 20px;display:none;align-items:center;justify-content:center;text-align:center;background:rgba(248,250,252,.92);border:1px solid #fca5a5;border-radius:18px;color:#991b1b;font-weight:900;z-index:4}.nodata.show{display:flex}.bottom{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--ln);background:#eef2f7}.bottom canvas{border-inline-start:1px solid var(--ln)}canvas{display:block;width:100%;height:100%}.modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(15,23,42,.35);z-index:9;padding:16px}.modal.open{display:flex}.box{width:min(960px,96vw);max-height:92vh;overflow:auto;background:#f8fafc;border:1px solid #94a3b8;border-radius:22px;box-shadow:var(--sh);padding:18px}.mh{display:flex;align-items:center;justify-content:space-between}.input{height:40px;border:1px solid var(--ln);border-radius:14px;background:#fff;padding:0 10px;font-weight:800;max-width:260px}.btrow{direction:ltr;display:flex;gap:8px;flex-wrap:wrap;align-items:end}.btf{display:flex;flex-direction:column;gap:4px}.btf label{font-size:10px;color:var(--m);font-weight:900;direction:ltr}pre{white-space:pre-wrap;background:#fff;border:1px solid #94a3b8;border-radius:15px;padding:12px;color:#0f172a;font:800 12px "JetBrains Mono";direction:ltr;text-align:left;min-height:180px}.livePulse{animation:pulse .6s}@keyframes pulse{0%{transform:scale(1.03)}100%{transform:scale(1)}}@media(max-width:1050px){body{overflow:auto}.app{height:auto;display:block}.top{display:flex;flex-direction:column}.brand h1{font-size:14px}.big{font-size:31px}.grid{display:flex;flex-direction:column;height:auto;overflow:visible;padding:6px}.chartPanel{height:730px;min-height:730px;order:1}.panel{overflow:visible}.side:first-child{order:2}.side:last-child{order:3}.toolbar{overflow:auto;flex-wrap:nowrap}.tool{flex:0 0 auto}}
+
+/* V11.1 fixes */
+
+.lockedNote{border:1px solid #f59e0b;background:#fffbeb;color:#92400e;border-radius:12px;padding:8px;margin-top:8px;font-weight:900}
+
+.hardLockMark{display:inline-block;margin-inline-start:6px;padding:2px 7px;border-radius:999px;background:#fffbeb;border:1px solid #f59e0b;color:#92400e;font-weight:900;font-size:11px}
+
+.reportBox{white-space:pre-wrap;background:#fff;border:1px solid #94a3b8;border-radius:15px;padding:12px;color:#0f172a;font:800 12px "JetBrains Mono";direction:ltr;text-align:left;min-height:240px;line-height:1.65}
+.reportActions{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+
+.modeHint{border:1px solid #93c5fd;background:#eff6ff;color:#1e3a8a;border-radius:12px;padding:8px;margin-top:8px;font-weight:900}
+
+.ticker{direction:rtl;background:#fff7ed;border-bottom:1px solid #fed7aa;color:#7c2d12;font-weight:900;padding:7px 12px;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bottom{height:132px}
+.guideText{font:800 10px Cairo;color:#475569}
+
+.targetGuard{border:1px solid #ef4444;background:#fff1f2;color:#991b1b;border-radius:12px;padding:8px;margin-top:8px;font-weight:900}
+.safeGuard{border:1px solid #22c55e;background:#f0fdf4;color:#166534;border-radius:12px;padding:8px;margin-top:8px;font-weight:900}
+
+.gannNote{border:1px solid #8b5cf6;background:#f5f3ff;color:#4c1d95;border-radius:12px;padding:8px;margin-top:8px;font-weight:900}
+
+.hybridMini{display:grid;grid-template-columns:1fr;gap:7px}
+.hybridItem{background:#f8fafc;border:1px solid #cbd5e1;border-radius:12px;padding:8px}
+.hybridItem b{display:block;font:900 12px JetBrains Mono}
+.hybridItem small{display:block;color:#64748b;font-size:11px;line-height:1.35}
+.footprintNote{border:1px solid #38bdf8;background:#ecfeff;color:#155e75;border-radius:12px;padding:8px;margin-top:8px;font-weight:900}
+.opportunityNote{border:1px solid #f59e0b;background:#fffbeb;color:#92400e;border-radius:12px;padding:8px;margin-top:8px;font-weight:900}
+</style></head><body><div class="app"><div class="top"><div class="brand"><div class="logo">⚡</div><div><h1>XAU / BTC / XAG SCALP EXECUTION ENGINE V11.11</h1><p>Designed by Eng. Ahmad Nasser — 03715512 • Technical Schools • Session Liquidity • Smart Footprint • Opportunity Hunter • No Demo</p></div></div><div class="px"><div id="livePrice" class="big">NO DATA</div><div class="ba"><span id="bidLbl" class="bid">BID ---</span> | <span id="askLbl" class="ask">ASK ---</span> | <span id="sprLbl" class="spr">SPR ---</span></div></div><div class="ctrl"><div id="apiStatus" class="status warn"><i class="dot"></i><span>METAAPI CHECK</span></div><select id="asset"><option value="XAUUSD">🥇 XAUUSD</option><option value="BTCUSD">₿ BTCUSD Meta</option><option value="BTCUSDT">₿ BTCUSDT Binance</option><option value="XAGUSD">🥈 XAGUSD</option></select><select id="mode"><option value="aggressive">Aggressive Scalp</option><option value="balanced">Balanced Scalp</option><option value="conservative">Conservative Scalp</option></select><button class="tf" data-tf="1m">M1</button><button class="tf active" data-tf="5m">M5</button><button class="tf" data-tf="15m">M15</button></div></div><div class="grid"><aside class="panel side"><div class="card"><h2>SCALP TABLEAU</h2><div class="score"><div class="metric"><b id="grade">--</b><span>SETUP</span></div><div class="metric"><b id="htf">--</b><span>HTF</span></div><div class="metric"><b id="trigger">--</b><span>TRIGGER</span></div><div class="metric"><b id="quality">--%</b><span>QUALITY</span></div></div></div><div class="card"><h3>ENTRY / SL / TP</h3><div class="line"><span>Signal</span><b id="side">WAIT</b></div><div class="line"><span>Entry</span><b id="entry">---</b></div><div class="line"><span>SL</span><b id="sl">---</b></div><div class="line"><span>TP1</span><b id="tp1">---</b></div><div class="line"><span>TP2</span><b id="tp2">---</b></div><div class="line"><span>TP3</span><b id="tp3">---</b></div><div class="line"><span>BE</span><b id="be">---</b></div><div class="line"><span>Live Status</span><b id="tstat">WAIT</b></div><div class="line"><span>Live P/L</span><b id="pl">---</b></div></div><div class="card"><h3>CANDLE BEHAVIOR</h3><div id="candleBox"></div></div><div class="card"><h3>Trading Alert</h3><div id="alertBox" class="alert">بانتظار بيانات MetaAPI.</div><button class="btn gold" onclick="saveSignal()">حفظ ومتابعة</button><button class="btn gold" onclick="openEntryReport()">تقرير الدخول</button><button class="btn" onclick="clearLockedTrade()">إنهاء الصفقة يدويًا</button><button class="btn" onclick="toggleSound()" id="sound">الصوت OFF</button></div></aside><main class="panel chartPanel"><div class="toolbar"><button class="tool on" data-layer="signals" onclick="toggleLayer('signals')">Signals</button><button class="tool on" data-layer="support" onclick="toggleLayer('support')">Support</button><button class="tool on" data-layer="resistance" onclick="toggleLayer('resistance')">Resistance</button><button class="tool on" data-layer="liquidity" onclick="toggleLayer('liquidity')">Liquidity</button><button class="tool on" data-layer="gann" onclick="toggleLayer('gann')">Gann</button><button class="tool on" data-layer="fvgBull" onclick="toggleLayer('fvgBull')">FVG Bull</button><button class="tool on" data-layer="fvgBear" onclick="toggleLayer('fvgBear')">FVG Bear</button><button class="tool on" data-layer="obBuy" onclick="toggleLayer('obBuy')">OB Buy</button><button class="tool on" data-layer="obSell" onclick="toggleLayer('obSell')">OB Sell</button><button class="tool on" data-layer="sessionAsia" onclick="toggleLayer('sessionAsia')">Asia H/L</button><button class="tool on" data-layer="sessionEu" onclick="toggleLayer('sessionEu')">EU H/L</button><button class="tool on" data-layer="sessionUs" onclick="toggleLayer('sessionUs')">US H/L</button><button class="tool on" data-layer="vwap" onclick="toggleLayer('vwap')">VWAP</button><button class="tool on" data-layer="ema" onclick="toggleLayer('ema')">EMA</button><button class="tool on" data-layer="candle" onclick="toggleLayer('candle')">Candle</button><button class="tool warn" onclick="zoom(1.2)">Zoom+</button><button class="tool warn" onclick="zoom(.84)">Zoom-</button><button class="tool" onclick="pan(-20)">◀</button><button class="tool" onclick="pan(20)">▶</button><button class="tool" onclick="resetView()">Reset</button><button class="tool warn" onclick="saveHD()">Save HD</button><button class="tool warn" onclick="openBT()">Backtest</button></div><div id="newsTape" class="ticker">بانتظار تحليل السوق...</div><div class="wrap"><canvas id="chart"></canvas><div id="ov" class="overlay"><div class="sig range">WAIT</div><div class="why">لا توجد إشارة.</div></div><div id="noData" class="nodata"><div><h2>TRADING DISABLED</h2><p id="noDataText">No MetaAPI data.</p></div></div></div><div class="bottom"><canvas id="rsi"></canvas><canvas id="macd"></canvas></div></main><aside class="panel side"><div class="card"><h2>SCALP DECISION</h2><div id="decision" class="decision">WAIT</div><div class="line"><span>Risk</span><b id="risk">---</b></div><div class="line"><span>RR TP2</span><b id="rr">---</b></div><div class="line"><span>Invalidation</span><b id="inv">---</b></div><div class="line"><span>Mode Rule</span><b id="modeRule">---</b></div><div class="line"><span>Lock Release</span><b id="lockRule">---</b></div></div><div class="card"><h3>ANALYSIS SCHOOLS</h3><div id="schools"></div></div><div class="card"><h3>LIVE FOLLOW-UP</h3><div id="follow"></div></div><div class="card"><h3>BACKTEST / JOURNAL</h3><div class="line"><span>Saved</span><b id="saved">0</b></div><button class="btn" onclick="exportJournal()">Export Journal</button></div><div class="card"><h3>HYBRID INTELLIGENCE PANELS</h3><div id="hybridPanels" class="hybridMini">بانتظار التحليل...</div></div><div class="card"><h3>Settings</h3><input id="candlesApi" class="input" value="/api/metaapi-candles"><input id="priceApi" class="input" value="/api/metaapi-price" style="margin-top:6px"><button class="btn gold" onclick="saveSettings()">Save</button></div></aside></div></div><div id="reportModal" class="modal"><div class="box"><div class="mh"><h2>تقرير دخول الصفقة المقفلة</h2><button class="btn" onclick="closeEntryReport()">إغلاق</button></div><p>هذا التقرير يتولد لحظة قفل الصفقة فقط، لذلك تبقى أرقام الدخول والتحليل ثابتة حتى نهاية الصفقة.</p><div class="reportActions"><button class="btn gold" onclick="copyEntryReport()">Copy Report</button><button class="btn" onclick="downloadEntryReport()">Download TXT</button></div><div id="entryReportBox" class="reportBox">لا توجد صفقة مقفلة حاليًا.</div></div></div><div id="btModal" class="modal"><div class="box"><div class="mh"><h2>Backtest من ملف + Excel</h2><button class="btn" onclick="closeBT()">إغلاق</button></div><p>للسكالب الدقيق ارفع ملف M1 أو M5. الأعمدة: time, open, high, low, close, volume/tickVolume.</p><div class="btrow"><div class="btf"><label>FROM</label><input id="btFrom" class="input" type="date"></div><div class="btf"><label>TO</label><input id="btTo" class="input" type="date"></div><div class="btf"><label>FILE TF</label><select id="btTf" class="input"><option>1m</option><option selected>5m</option><option>15m</option></select></div><div class="btf"><label>CANDLE FILE</label><input id="btFile" class="input" type="file" accept=".csv,.json,.txt"></div><button class="btn gold" onclick="runBT()">Run Backtest</button><button class="btn" onclick="exportBT()">Export Excel</button></div><pre id="btResult">بانتظار التشغيل...</pre></div></div><script>
+const $=id=>document.getElementById(id),fmt=(n,d=2)=>Number(n).toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d}),clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+let symbol=localStorage.scalp_symbol||'XAUUSD',tf=localStorage.scalp_tf||'5m',mode=localStorage.scalp_mode||'safe',candlesApi=localStorage.scalp_candles||'/api/metaapi-candles',priceApi=localStorage.scalp_price||'/api/metaapi-price';
+let candles=[],htf=[],quote=null,sig=null,geom=null,view=170,off=0,layers={signals:1,support:1,resistance:1,liquidity:1,gann:1,fvgBull:1,fvgBear:1,obBuy:1,obSell:1,sessionAsia:1,sessionEu:1,sessionUs:1,vwap:1,ema:1,candle:1},audio=false,lastBT=[];
+let externalIntel={source:'fallback',depth:null,trades:null,updated:0,message:'Best available local/MetaAPI data'};
+let activeTrade=null;
+const MODE_CONFIGS={
+  aggressive:{name:'Aggressive',display:55,alert:65,trade:75,gradeB:68,gradeA:76,gradeAP:86,htf:'5m',release:'TP2',btWin:'TP1',slAtr:.10,tp1:0.8,tp2:1.2,tp3:1.6,cooldown:45},
+  balanced:{name:'Balanced',display:58,alert:68,trade:80,gradeB:70,gradeA:80,gradeAP:88,htf:'15m',release:'TP3',btWin:'TP2',slAtr:.15,tp1:1.0,tp2:1.5,tp3:2.2,cooldown:120},
+  conservative:{name:'Conservative',display:65,alert:75,trade:85,gradeB:75,gradeA:84,gradeAP:92,htf:'15m',release:'TP3',btWin:'TP3',slAtr:.25,tp1:1.0,tp2:1.8,tp3:2.8,cooldown:180}
+};
+function cfg(m=mode){return MODE_CONFIGS[m]||MODE_CONFIGS.balanced}
+if(!MODE_CONFIGS[mode]){mode='balanced';localStorage.scalp_mode=mode}
+let signalCooldownUntil=Number(localStorage.scalp_cooldown_until||0);
+try{activeTrade=JSON.parse(localStorage.scalp_active_trade||'null')}catch(e){activeTrade=null}
+if(activeTrade && !activeTrade.releaseAt){activeTrade.releaseAt=cfg(activeTrade.mode||mode).release;saveActiveTrade?.()}
+
+function status(cls,msg){let e=$('apiStatus');e.className='status '+cls;e.querySelector('span').textContent=msg}
+function norm(c){return{t:Date.parse(c.time||c.brokerTime||c.date||c.datetime||c.t),o:+(c.open??c.o),h:+(c.high??c.h),l:+(c.low??c.l),c:+(c.close??c.c),v:+(c.tickVolume??c.volume??c.v??1),state:c.state||'complete'}}
+function complete(c){return c.state==='complete'||!c.state}
+function isBinanceBTC(sym=symbol){return String(sym).toUpperCase()==='BTCUSDT'}
+function binanceInterval(t){return String(t).replace('m','m').replace('h','h').replace('d','d')}
+async function fc(sym=symbol,t=tf,limit=700,start=''){
+  if(isBinanceBTC(sym)){
+    let q=new URLSearchParams({symbol:'BTCUSDT',timeframe:binanceInterval(t),limit:String(limit)});if(start)q.set('startTime',String(new Date(start).getTime()));
+    let r=await fetch('/api/binance-klines?'+q,{cache:'no-store'}),j=await r.json().catch(()=>null);if(!r.ok||!j?.ok)throw Error(j?.detail||j?.error||'Binance candles failed');
+    let a=(j.candles||[]).map(norm).filter(x=>Number.isFinite(x.t)&&Number.isFinite(x.o)&&Number.isFinite(x.h)&&Number.isFinite(x.l)&&Number.isFinite(x.c)).sort((a,b)=>a.t-b.t);if(!a.length)throw Error('No Binance candles');return a;
+  }
+  let q=new URLSearchParams({symbol:sym,timeframe:t,limit:String(limit)});if(start)q.set('startTime',new Date(start).toISOString());let r=await fetch(candlesApi+'?'+q,{cache:'no-store'}),j=await r.json().catch(()=>null);if(!r.ok)throw Error(j?.detail||j?.error||'candles failed');let a=(Array.isArray(j)?j:(j.candles||j.data||[])).map(norm).filter(x=>Number.isFinite(x.t)&&Number.isFinite(x.o)&&Number.isFinite(x.h)&&Number.isFinite(x.l)&&Number.isFinite(x.c)).filter(complete).sort((a,b)=>a.t-b.t);if(!a.length)throw Error('No candles');return a}
+async function fq(){
+  if(isBinanceBTC()){
+    let r=await fetch('/api/binance-price?symbol=BTCUSDT',{cache:'no-store'}),j=await r.json().catch(()=>null);if(!r.ok||!j?.ok)throw Error(j?.detail||j?.error||'Binance quote failed');return{bid:+j.bid,ask:+j.ask,mid:+j.mid,spread:+j.spread,time:j.time,brokerTime:j.time,source:'binance'};
+  }
+  let r=await fetch(priceApi+'?symbol='+encodeURIComponent(symbol)+'&keepSubscription=true',{cache:'no-store'}),j=await r.json().catch(()=>null);if(!r.ok)throw Error(j?.detail||j?.error||'quote failed');if(!Number.isFinite(+j.bid)||!Number.isFinite(+j.ask))throw Error('no bid/ask');return{bid:+j.bid,ask:+j.ask,mid:(+j.bid+ +j.ask)/2,spread:+(j.spread??(+j.ask-+j.bid)),time:j.time,brokerTime:j.brokerTime,source:'metaapi'}}
+async function refreshQ(){try{quote=await fq();$('livePrice').textContent=(symbol.startsWith('BTC')?'$':'')+fmt(quote.mid,2);$('bidLbl').textContent='BID '+fmt(quote.bid,2);$('askLbl').textContent='ASK '+fmt(quote.ask,2);$('sprLbl').textContent='SPR '+fmt(quote.spread,2);$('livePrice').classList.remove('livePulse');void $('livePrice').offsetWidth;$('livePrice').classList.add('livePulse');status('live','QUOTE LIVE');if(sig){track();drawAll()}}catch(e){if(quote){status('warn','QUOTE DELAY')}else{status('warn','QUOTE CHECK')}}}
+
+async function refreshExternalIntel(){
+  try{
+    if(String(symbol).startsWith('BTC')){
+      const [d,t]=await Promise.allSettled([
+        fetch('/api/binance-depth?symbol=BTCUSDT&limit=100',{cache:'no-store'}).then(r=>r.json()),
+        fetch('/api/binance-aggtrades?symbol=BTCUSDT&limit=500',{cache:'no-store'}).then(r=>r.json())
+      ]);
+      externalIntel={source:'binance',depth:d.status==='fulfilled'&&d.value?.ok?d.value:null,trades:t.status==='fulfilled'&&t.value?.ok?t.value:null,updated:Date.now(),message:'BTC Binance order book + aggressive trades'};
+    }else{
+      externalIntel={source:'meta-fallback',depth:null,trades:null,updated:Date.now(),message:'XAU/XAG: MetaAPI candles + tickVolume/wick absorption fallback'};
+    }
+  }catch(e){externalIntel={source:'fallback',depth:null,trades:null,updated:Date.now(),message:e.message||'External intel unavailable'}}
+}
+function sessionLiquidityEngine(s){
+  const last=s.last, at=s.at||1, sess=s.sess||[];let events=[];
+  sess.slice(-8).forEach(x=>{if(last.h>x.hi&&last.c<x.hi)events.push({dir:'SELL',score:72,reason:`Sweep فوق ${x.k.toUpperCase()} H ${fmt(x.hi,2)} ثم إغلاق تحته`});if(last.l<x.lo&&last.c>x.lo)events.push({dir:'BUY',score:72,reason:`Sweep تحت ${x.k.toUpperCase()} L ${fmt(x.lo,2)} ثم إغلاق فوقه`});if(Math.abs(last.c-x.hi)<at*.55)events.push({dir:'RANGE',score:55,reason:`قرب سيولة ${x.k.toUpperCase()} H ${fmt(x.hi,2)}`});if(Math.abs(last.c-x.lo)<at*.55)events.push({dir:'RANGE',score:55,reason:`قرب سيولة ${x.k.toUpperCase()} L ${fmt(x.lo,2)}`});});
+  let best=events.sort((a,b)=>b.score-a.score)[0]||{dir:'RANGE',score:42,reason:'لا يوجد sweep جلسات واضح'};return {...best,events};
+}
+function smartMoneyFootprint(cs,last,at){
+  if(externalIntel?.source==='binance'&&(externalIntel.depth||externalIntel.trades)){
+    const d=externalIntel.depth||{},tr=externalIntel.trades||{};let bidVol=d.bidVolume||0,askVol=d.askVolume||0,imb=(bidVol-askVol)/Math.max(1,bidVol+askVol);let buyAgg=tr.buyAggVolume||0,sellAgg=tr.sellAggVolume||0,agg=(buyAgg-sellAgg)/Math.max(1,buyAgg+sellAgg);let val=imb*.55+agg*.45;let dir=val>.12?'BUY':val<-.12?'SELL':'RANGE';let score=clamp(Math.round(Math.abs(val)*120+45),0,92);let reason=`Binance Footprint: book ${(imb*100).toFixed(0)}% / aggression ${(agg*100).toFixed(0)}%`;return{dir,score,reason,bidVol,askVol,buyAgg,sellAgg,source:'Binance'};
+  }
+  const recent=cs.slice(-24),avg=recent.reduce((s,c)=>s+(c.v||1),0)/Math.max(1,recent.length),l=cs.at(-1),body=Math.abs(l.c-l.o),rng=l.h-l.l||1,uw=l.h-Math.max(l.o,l.c),lw=Math.min(l.o,l.c)-l.l,vol=(l.v||1)/Math.max(1,avg);let dir='RANGE',score=42,reason='Fallback footprint: tickVolume only';
+  if(vol>1.2&&lw>body*1.5){dir='BUY';score=62;reason='TickVolume absorption: ذيل سفلي + حجم أعلى من المتوسط'}
+  if(vol>1.2&&uw>body*1.5){dir='SELL';score=62;reason='TickVolume absorption: ذيل علوي + حجم أعلى من المتوسط'}
+  return{dir,score,reason,source:'MetaAPI tickVolume fallback'};
+}
+function opportunityHunterEngine(s){
+  const last=s.last,at=s.at||1,out=[];
+  const r=s.res?.[0]?.price, sup=s.sup?.[0]?.price;
+  if(r&&last.c<r&&r-last.c<at*1.1)out.push({dir:'BUY',score:60,reason:`اختراق وثبات فوق ${fmt(r,2)} قد يفتح صعودًا إلى المقاومة التالية/TP`});
+  if(sup&&last.c>sup&&last.c-sup<at*1.1)out.push({dir:'SELL',score:60,reason:`كسر وثبات تحت ${fmt(sup,2)} قد يفتح هبوطًا إلى الدعم التالي`});
+  if(s.sessionLiquidity?.events?.length)out.push(...s.sessionLiquidity.events.map(e=>({dir:e.dir,score:e.score,reason:'جلسات: '+e.reason})));
+  if(s.gann?.nearest)out.push({dir:s.gann.dir,score:55,reason:`Gann: مراقبة خط ${s.gann.nearest.label} ${fmt(s.gann.nearest.current,2)} كمنطقة رد فعل`});
+  const best=out.sort((a,b)=>b.score-a.score)[0]||{dir:'RANGE',score:40,reason:'لا توجد فرصة خفية عالية الجودة الآن'};return{...best,items:out.slice(0,5)};
+}
+function technicalSchoolSummary(s){
+  const buy=(s.schools||[]).filter(x=>x.d==='BUY').reduce((a,b)=>a+b.s,0),sell=(s.schools||[]).filter(x=>x.d==='SELL').reduce((a,b)=>a+b.s,0),range=(s.schools||[]).filter(x=>x.d==='RANGE').reduce((a,b)=>a+b.s,0);return{buy,sell,range,leader:buy>sell&&buy>range?'BUY':sell>buy&&sell>range?'SELL':'RANGE',text:`Technical Schools: BUY ${buy} / SELL ${sell} / RANGE ${range}`}
+}
+function attachHybridModules(s,cs){
+  if(!s)return s; s.technical=technicalSchoolSummary(s);s.sessionLiquidity=sessionLiquidityEngine(s);s.footprint=smartMoneyFootprint(cs||candles,s.last,s.at);s.opportunity=opportunityHunterEngine(s);
+  return s;
+}
+async function load(){try{status('warn',isBinanceBTC()?'BINANCE CHECK':'METAAPI CHECK');candles=await fc(symbol,tf,700);let htfTF=cfg().htf;htf=await fc(symbol,htfTF,500).catch(()=>candles);await refreshExternalIntel();$('noData').classList.remove('show');sig=lockSignal(attachHybridModules(analyze(candles,htf),candles));sig=attachHybridModules(sig,candles);panels();drawAll();status('live',isBinanceBTC()?'BINANCE LIVE':'METAAPI LIVE')}catch(e){$('noData').classList.add('show');$('noDataText').textContent=e.message||e;status('err',isBinanceBTC()?'BINANCE ERROR':'METAAPI ERROR')}}
+function ema(a,n){let k=2/(n+1),o=[];a.forEach((v,i)=>o[i]=i?o[i-1]+k*(v-o[i-1]):v);return o}
+function atr(cs,n=14){return cs.map((c,i)=>{let arr=[];for(let j=Math.max(1,i-n+1);j<=i;j++){let x=cs[j],p=cs[j-1];arr.push(Math.max(x.h-x.l,Math.abs(x.h-p.c),Math.abs(x.l-p.c)))}return arr.length?arr.reduce((s,x)=>s+x,0)/arr.length:c.h-c.l})}
+function rsi(cs,n=14){let cl=cs.map(c=>c.c);return cl.map((_,i)=>{if(i<n)return 50;let g=0,l=0;for(let j=i-n+1;j<=i;j++){let d=cl[j]-cl[j-1];d>=0?g+=d:l-=d}return l?100-100/(1+g/l):100})}
+function macd(cs){let cl=cs.map(c=>c.c),a=ema(cl,12),b=ema(cl,26),line=cl.map((_,i)=>a[i]-b[i]),s=ema(line,9);return{line,sig:s,hist:line.map((v,i)=>v-s[i])}}
+function vwap(cs){let pv=0,v=0;return cs.map(c=>{pv+=((c.h+c.l+c.c)/3)*(c.v||1);v+=(c.v||1);return pv/v})}
+function piv(cs,n=3){let hi=[],lo=[];for(let i=n;i<cs.length-n;i++){let s=cs.slice(i-n,i+n+1);if(cs[i].h===Math.max(...s.map(x=>x.h)))hi.push({i,price:cs[i].h,t:cs[i].t});if(cs[i].l===Math.min(...s.map(x=>x.l)))lo.push({i,price:cs[i].l,t:cs[i].t})}return{hi,lo}}
+function cluster(a,t){let o=[];a.sort((x,y)=>x.price-y.price).forEach(l=>{let g=o.find(z=>Math.abs(z.price-l.price)<=t);g?(g.items.push(l),g.price=g.items.reduce((s,x)=>s+x.price,0)/g.items.length):o.push({price:l.price,items:[l]})});return o.sort((a,b)=>b.items.length-a.items.length)}
+function fvg(cs){let o=[];for(let i=2;i<cs.length;i++){if(cs[i].l>cs[i-2].h)o.push({i,type:'BULL',lo:cs[i-2].h,hi:cs[i].l});if(cs[i].h<cs[i-2].l)o.push({i,type:'BEAR',lo:cs[i].h,hi:cs[i-2].l})}return o.slice(-16)}
+function ob(cs){let o=[];for(let i=3;i<cs.length;i++){let c=cs[i],p=cs[i-1],body=Math.abs(c.c-c.o),rng=c.h-c.l;if(body>rng*.58&&c.c>c.o&&p.c<p.o)o.push({i,type:'BUY',lo:p.l,hi:p.h});if(body>rng*.58&&c.c<c.o&&p.c>p.o)o.push({i,type:'SELL',lo:p.l,hi:p.h})}return o.slice(-12)}
+function sessions(cs){let by={},out=[];cs.forEach(c=>{let d=new Date(c.t),key=d.toISOString().slice(0,10),h=d.getUTCHours();by[key]=by[key]||{asia:[],eu:[],us:[]};if(h<8)by[key].asia.push(c);if(h>=7&&h<16)by[key].eu.push(c);if(h>=13&&h<22)by[key].us.push(c)});Object.entries(by).forEach(([day,o])=>['asia','eu','us'].forEach(k=>{if(o[k].length)out.push({day,k,hi:Math.max(...o[k].map(c=>c.h)),lo:Math.min(...o[k].map(c=>c.l))})}));return out.slice(-8)}
+function candleBeh(cs){let n=cs.length,last=cs[n-1],p=cs[n-2],p2=cs[n-3],at=atr(cs).at(-1),rng=last.h-last.l||1,body=Math.abs(last.c-last.o),up=last.h-Math.max(last.c,last.o),lo=Math.min(last.c,last.o)-last.l,pos=(last.c-last.l)/rng,list=[],score=0;let add=(name,dir,pts,why)=>{list.push({name,dir,pts,why});score+=dir==='BUY'?pts:dir==='SELL'?-pts:0};if(lo>body*1.8&&pos>.62)add('Bullish Rejection','BUY',18,'ذيل سفلي');if(up>body*1.8&&pos<.38)add('Bearish Rejection','SELL',18,'ذيل علوي');if(p&&last.c>last.o&&p.c<p.o&&last.c>p.o&&last.o<p.c)add('Bullish Engulfing','BUY',22,'ابتلاع صاعد');if(p&&last.c<last.o&&p.c>p.o&&last.o>p.c&&last.c<p.o)add('Bearish Engulfing','SELL',22,'ابتلاع هابط');if(p2&&p2.c<p2.o&&Math.abs(p.c-p.o)<Math.abs(p2.c-p2.o)*.55&&last.c>last.o&&last.c>(p2.o+p2.c)/2)add('Morning Star','BUY',24,'نجمة صباح');if(p2&&p2.c>p2.o&&Math.abs(p.c-p.o)<Math.abs(p2.c-p2.o)*.55&&last.c<last.o&&last.c<(p2.o+p2.c)/2)add('Evening Star','SELL',24,'نجمة مساء');if(body<rng*.15)add('Doji','RANGE',8,'تردد');if(body>at*.75&&up<rng*.18&&lo<rng*.18)add(last.c>last.o?'Momentum Bull':'Momentum Bear',last.c>last.o?'BUY':'SELL',14,'زخم');let look=cs.slice(-35,-1),rh=Math.max(...look.map(c=>c.h)),rl=Math.min(...look.map(c=>c.l));if(last.l<rl&&last.c>rl)add('Sweep Low Candle','BUY',28,'سحب قاع');if(last.h>rh&&last.c<rh)add('Sweep High Candle','SELL',28,'سحب قمة');if(p&&last.h<p.h&&last.l>p.l)add('Inside Bar Compression','RANGE',12,'ضغط');return{list,dir:score>18?'BUY':score<-18?'SELL':'RANGE',score:Math.round(clamp(Math.abs(score),0,100)),reason:list.slice(-3).map(x=>x.name).join(' + ')||'No clear candle',rh,rl}}
+
+function saveActiveTrade(){if(activeTrade)localStorage.scalp_active_trade=JSON.stringify(activeTrade);else localStorage.removeItem('scalp_active_trade')}
+function closeActiveTrade(status,price){
+  if(activeTrade){
+    activeTrade.status=status;
+    activeTrade.exit=price;
+    activeTrade.closedAt=Date.now();
+    const hist=JSON.parse(localStorage.scalp_closed_trades||'[]');
+    hist.push(activeTrade);
+    localStorage.scalp_closed_trades=JSON.stringify(hist.slice(-300));let all=JSON.parse(localStorage.scalp_all_suggestions||'[]');let rec=all.find(x=>x.id===activeTrade.createdAt);if(rec){rec.status=status;rec.exit=price;rec.closedAt=new Date().toISOString();rec.failureCause=status==='SL HIT'?'السعر ضرب SL: النموذج فشل أو الدخول كان قبل تأكيد كافٍ':'تم الوصول إلى هدف التحرير/الهدف النهائي';localStorage.scalp_all_suggestions=JSON.stringify(all.slice(-500));}
+  }
+  activeTrade=null;saveActiveTrade();
+  signalCooldownUntil=Date.now()+cfg(activeTrade?.mode||mode).cooldown*1000;
+  localStorage.scalp_cooldown_until=String(signalCooldownUntil);
+}
+function evalTradeStatus(t,p){
+  if(!t||!Number.isFinite(p))return 'WAIT';
+  if(t.dir==='BUY'){
+    if(p<=t.sl)return 'SL HIT';
+    if(p>=t.tp3)return 'TP3 HIT';
+    if(p>=t.tp2)return 'TP2 HIT';
+    if(p>=t.tp1)return 'TP1 HIT → BE';
+  }else if(t.dir==='SELL'){
+    if(p>=t.sl)return 'SL HIT';
+    if(p<=t.tp3)return 'TP3 HIT';
+    if(p<=t.tp2)return 'TP2 HIT';
+    if(p<=t.tp1)return 'TP1 HIT → BE';
+  }
+  return 'ACTIVE';
+}
+
+function levelList(a){return (a||[]).slice(0,4).map(x=>fmt(x.price||x,2)).join(' | ')||'---'}
+function boxList(a){return (a||[]).slice(-4).map(x=>`${x.type} ${fmt(x.lo,2)}-${fmt(x.hi,2)}`).join(' | ')||'---'}
+function sessionList(a){return (a||[]).slice(-6).map(x=>`${x.k.toUpperCase()} H ${fmt(x.hi,2)} / L ${fmt(x.lo,2)} ${x.day.slice(5)}`).join(' | ')||'---'}
+function candleTable(cs){
+  return (cs||[]).slice(-7).map(c=>{
+    const body=Math.abs(c.c-c.o),rng=Math.max(.000001,c.h-c.l),up=c.h-Math.max(c.o,c.c),lo=Math.min(c.o,c.c)-c.l;
+    return `${new Date(c.t).toLocaleString('en-GB')} | O ${fmt(c.o,2)} H ${fmt(c.h,2)} L ${fmt(c.l,2)} C ${fmt(c.c,2)} | Body ${(body/rng*100).toFixed(0)}% | Upper ${(up/rng*100).toFixed(0)}% | Lower ${(lo/rng*100).toFixed(0)}%`;
+  }).join('\n')||'---'
+}
+function buildEntryReport(s){
+  const now=new Date().toLocaleString('en-GB');
+  const bid=quote?fmt(quote.bid,2):'---', ask=quote?fmt(quote.ask,2):'---', mid=quote?fmt(quote.mid,2):fmt(s.entry,2), spread=quote?fmt(quote.spread,2):'---';
+  const risk=s.sl?Math.abs(s.entry-s.sl):0;
+  const rr1=s.tp1&&risk?Math.abs(s.tp1-s.entry)/risk:0, rr2=s.tp2&&risk?Math.abs(s.tp2-s.entry)/risk:0, rr3=s.tp3&&risk?Math.abs(s.tp3-s.entry)/risk:0;
+  const schools=(s.schools||[]).map(x=>`- ${x.n}: ${x.d} ${x.s}% ${x.w?`| ${x.w}`:''}`).join('\n')||'---';
+  const candlesTxt=candleTable(candles);
+  const cb=(s.cb?.list||[]).map(x=>`- ${x.name}: ${x.dir} ${x.pts||x.score||''} | ${x.why||''}`).join('\n')||s.cb?.reason||'---';
+  return `SCALP ENTRY REPORT - V11.11
+Generated: ${now}
+Symbol: ${symbol}\nMode: ${cfg(s.mode||mode).name} | Trade ≥ ${cfg(s.mode||mode).trade}% | Release ${cfg(s.mode||mode).release} | Backtest target ${cfg(s.mode||mode).btWin}
+Signal TF: ${tf}
+Mode: ${mode}
+Data: MetaAPI for XAU/XAG + Binance public BTC liquidity/footprint when available / No Demo
+
+==============================
+1) FINAL DECISION
+==============================
+Decision: ${s.dir}
+Lock: ACTIVE TRADE LOCK
+Setup Grade: ${s.grade}
+Quality: ${s.q}%
+HTF Bias: ${s.htfBias}
+Main Reason: ${s.reason}\nTarget Guard: ${s.targetGuard?.message||'No obstacle before target'}\nGann: ${s.gann?`${s.gann.trend} from ${s.gann.anchorType} ${fmt(s.gann.anchorPrice,2)} | nearest ${s.gann.nearest.label} ${fmt(s.gann.nearest.current,2)} | ${s.gann.reason}`:'OFF'}
+
+Live Quote At Lock:
+Bid: ${bid}
+Ask: ${ask}
+Mid: ${mid}
+Spread: ${spread}
+
+==============================
+2) TRADE PLAN
+==============================
+Entry: ${fmt(s.entry,2)}
+Stop Loss: ${fmt(s.sl,2)}
+Risk Distance: ${fmt(risk,2)}
+
+TP1: ${fmt(s.tp1,2)} | RR ${rr1.toFixed(2)}
+TP2: ${fmt(s.tp2,2)} | RR ${rr2.toFixed(2)}
+TP3: ${fmt(s.tp3,2)} | RR ${rr3.toFixed(2)}
+Break Even: after TP1 / BE level = ${fmt(s.entry,2)}
+
+Lock Rule:
+- No new trade until TP3 HIT or SL HIT.
+- TP1 and TP2 are follow-up only.
+- Entry, SL and targets remain fixed.
+
+==============================
+3) ANALYSIS SCHOOLS
+==============================
+${schools}
+
+==============================
+4) CANDLE BEHAVIOR ENGINE
+==============================
+Trigger: ${s.cb?.reason||'---'}
+Detected patterns:
+${cb}
+
+Last candles snapshot:
+${candlesTxt}
+
+==============================
+5) KEY ZONES
+==============================
+Nearest Supports:
+${levelList(s.sup)}
+
+Nearest Resistances:
+${levelList(s.res)}
+
+Recent FVG:
+${boxList(s.fg)}
+
+Recent OB:
+${boxList(s.obs)}
+
+Sessions High / Low:
+${sessionList(s.sess)}
+
+Gann Lines Now:\n${s.gann?(s.gann.lines||[]).map(x=>`- ${x.label}: ${fmt(x.current,2)}`).join('\n'):'---'}\n\nVWAP last: ${s.vw?fmt(s.vw.at(-1),2):'---'}
+EMA20 last: ${s.e20?fmt(s.e20.at(-1),2):'---'}
+EMA50 last: ${s.e50?fmt(s.e50.at(-1),2):'---'}
+RSI last: ${s.rs?fmt(s.rs.at(-1),1):'---'}
+MACD histogram last: ${s.mc?fmt(s.mc.hist.at(-1),3):'---'}
+
+==============================
+5B) HYBRID INTELLIGENCE MODULES
+==============================
+Technical Schools: ${s.technical?.text||'---'}
+Session Liquidity: ${s.sessionLiquidity?`${s.sessionLiquidity.dir} ${s.sessionLiquidity.score}% | ${s.sessionLiquidity.reason}`:'---'}
+Smart Money Footprint: ${s.footprint?`${s.footprint.dir} ${s.footprint.score}% | ${s.footprint.reason} | ${s.footprint.source}`:'---'}
+Opportunity Hunter: ${s.opportunity?`${s.opportunity.dir} ${s.opportunity.score}% | ${s.opportunity.reason}`:'---'}
+Data Enrichment: ${externalIntel?.message||'---'}
+
+==============================
+6) INVALIDATION / MANAGEMENT
+==============================
+Invalidation: ${s.dir==='BUY'?'price reaches or closes under SL zone':'price reaches or closes above SL zone'}
+SL Level: ${fmt(s.sl,2)}
+
+Management:
+- If TP1 hit: mark BE active.
+- If TP2 hit: keep remaining target toward TP3 or manually secure partial profit.
+- If price returns strongly against setup before TP1, consider manual review.
+- Strong news or abnormal spread invalidates scalping quality.
+
+==============================
+7) NOTE
+==============================
+This is an execution report, not a guarantee. It documents why the system locked the trade and what must happen to keep the setup valid.
+`;
+}
+function openEntryReport(){
+  const rep=activeTrade?.reportText || (sig?.locked?buildEntryReport(sig):`لا توجد صفقة حقيقية مقفلة حاليًا. التقرير يتولد فقط عند صفقة ${cfg().trade}% وما فوق.`);
+  $('entryReportBox').textContent=rep;
+  $('reportModal').classList.add('open');
+}
+function closeEntryReport(){$('reportModal').classList.remove('open')}
+function copyEntryReport(){navigator.clipboard?.writeText($('entryReportBox').textContent||'');alert('تم نسخ التقرير')}
+function downloadEntryReport(){
+  const txt=$('entryReportBox').textContent||'No report';
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'text/plain;charset=utf-8'}));a.download=`entry_report_${symbol}_${tf}_${new Date().toISOString().slice(0,19).replace(/[:T]/g,'-')}.txt`;a.click();
+}
+function lockSignal(fresh){
+  const p=quote?.mid||fresh?.last?.c;
+  if(activeTrade && activeTrade.symbol===symbol){
+    const st=evalTradeStatus(activeTrade,p);
+    activeTrade.lastStatus=st;activeTrade.lastPrice=p;saveActiveTrade();
+    if(st==='SL HIT'||st===(activeTrade.releaseAt||cfg(activeTrade.mode||mode).release)+' HIT'){closeActiveTrade(st,p);return applyThresholdGate(fresh)}
+    return {...fresh,dir:activeTrade.dir,q:activeTrade.q,grade:activeTrade.grade,entry:activeTrade.entry,sl:activeTrade.sl,tp1:activeTrade.tp1,tp2:activeTrade.tp2,tp3:activeTrade.tp3,reason:'🔒 صفقة مقفلة قيد المتابعة: لا يتم إصدار صفقة جديدة حتى TP3 أو SL. السبب الأصلي: '+(activeTrade.reason||''),locked:true,lockStatus:st,targetGuard:activeTrade.targetGuard||fresh.targetGuard,htfBias:activeTrade.htfBias||fresh.htfBias,gann:activeTrade.gann||fresh.gann,technical:activeTrade.technical||fresh.technical,sessionLiquidity:activeTrade.sessionLiquidity||fresh.sessionLiquidity,footprint:activeTrade.footprint||fresh.footprint,opportunity:activeTrade.opportunity||fresh.opportunity,cb:{...fresh.cb,dir:activeTrade.dir,score:activeTrade.q,reason:activeTrade.candle||fresh.cb.reason}};
+  }
+  if(Date.now()<signalCooldownUntil){
+    return {...fresh,dir:'RANGE',q:0,grade:'WAIT',entry:null,sl:null,tp1:null,tp2:null,tp3:null,reason:'Cooldown بعد انتهاء الصفقة السابقة. ننتظر قبل إشارة جديدة.',cooldown:true};
+  }
+  const gated=applyThresholdGate(fresh);
+  if(gated && gated.tradeAllowed && gated.dir!=='RANGE'){
+    activeTrade={symbol,tf,mode,dir:gated.dir,q:gated.q,grade:gated.grade,entry:gated.entry,sl:gated.sl,tp1:gated.tp1,tp2:gated.tp2,tp3:gated.tp3,reason:gated.reason,candle:gated.cb?.reason||'',htfBias:gated.htfBias,targetGuard:gated.targetGuard,gann:gated.gann,technical:gated.technical,sessionLiquidity:gated.sessionLiquidity,footprint:gated.footprint,opportunity:gated.opportunity,releaseAt:cfg().release,btWin:cfg().btWin,createdAt:Date.now(),status:'ACTIVE',reportText:buildEntryReport(gated)};
+    saveActiveTrade();logProposedTrade(activeTrade);
+    return {...gated,locked:true,lockStatus:'ACTIVE'};
+  }
+  return gated;
+}
+function applyThresholdGate(fresh){
+  if(!fresh || fresh.dir==='RANGE') return fresh;
+  const rawDir=fresh.dir, q=Number(fresh.q||0);
+  const c=cfg();
+  if(q < c.display){
+    return {...fresh,rawDir,dir:'RANGE',grade:'NO',entry:null,sl:null,tp1:null,tp2:null,tp3:null,suppressed:true,tradeAllowed:false,reason:`NO TRADE: ${rawDir} ${q}% أقل من ${c.display}%. لا تظهر كصفقة ولا يتم قفلها.`};
+  }
+  if(q < c.trade){
+    const level=q>=c.alert?'ALERT':'WATCH';
+    return {...fresh,rawDir,watch:true,watchLevel:level,watchDir:rawDir,dir:'RANGE',grade:level,entry:null,sl:null,tp1:null,tp2:null,tp3:null,tradeAllowed:false,reason:`${level}: ${rawDir} ${q}% — ليست صفقة. الدخول والقفل في وضع ${c.name} فقط من ${c.trade}% وما فوق مع تأكيد.`};
+  }
+  return {...fresh,tradeAllowed:true};
+}
+
+
+function gannLinePrice(g,idx,ratio){
+  const bars=idx-g.anchorIndex;
+  const v=g.anchorPrice + (g.trend==='BULL'?1:-1)*g.unit*ratio*bars;
+  return v;
+}
+function gannAnalysis(ctx,cs){
+  const last=ctx.last, at=ctx.at||atr(cs).at(-1)||1, pv=ctx.pv||piv(cs);
+  const e20last=ctx.e20?.at(-1)||last.c;
+  const trend=last.c>=e20last?'BULL':'BEAR';
+  const lookFrom=Math.max(0,cs.length-140);
+  let anchor;
+  if(trend==='BULL'){
+    const lows=(pv.lo||[]).filter(x=>x.i>=lookFrom);
+    anchor=lows.length?lows.at(-1):{i:cs.slice(lookFrom).reduce((mi,c,j)=>c.l<cs[lookFrom+mi].l?j:mi,0)+lookFrom,price:Math.min(...cs.slice(lookFrom).map(c=>c.l)),t:last.t};
+    anchor.type='LOW';
+  }else{
+    const highs=(pv.hi||[]).filter(x=>x.i>=lookFrom);
+    anchor=highs.length?highs.at(-1):{i:cs.slice(lookFrom).reduce((mi,c,j)=>c.h>cs[lookFrom+mi].h?j:mi,0)+lookFrom,price:Math.max(...cs.slice(lookFrom).map(c=>c.h)),t:last.t};
+    anchor.type='HIGH';
+  }
+  const unit=Math.max(at*.12, symbol.startsWith('XAU')?.08:symbol.startsWith('BTC')?8:.01);
+  const ratios=[.25,.5,1,2,4], labels={.25:'1x4',.5:'1x2',1:'1x1',2:'2x1',4:'4x1'};
+  const nowIdx=cs.length-1;
+  const lines=ratios.map(r=>({ratio:r,label:labels[r],current:gannLinePrice({anchorIndex:anchor.i,anchorPrice:anchor.price,trend,unit},nowIdx,r)}));
+  const nearest=lines.reduce((a,b)=>Math.abs(b.current-last.c)<Math.abs(a.current-last.c)?b:a,lines[0]);
+  let dir='RANGE', score=42, reason=`Gann ${trend} nearest ${nearest.label} ${fmt(nearest.current,2)}`;
+  const one=lines.find(x=>x.ratio===1), half=lines.find(x=>x.ratio===.5);
+  if(trend==='BULL'){
+    if(last.c>one.current){dir='BUY';score=68;reason=`السعر فوق Gann 1x1 الصاعد؛ الزخم البنيوي داعم للشراء.`}
+    else if(last.c>half.current){dir='BUY';score=56;reason=`السعر فوق Gann 1x2 لكن تحت 1x1؛ شراء مراقبة وليس قويًا.`}
+    else {dir='RANGE';score=38;reason=`السعر تحت Gann 1x2؛ الصعود ضعيف أو يحتاج استعادة.`}
+  }else{
+    if(last.c<one.current){dir='SELL';score=68;reason=`السعر تحت Gann 1x1 الهابط؛ الزخم البنيوي داعم للبيع.`}
+    else if(last.c<half.current){dir='SELL';score=56;reason=`السعر تحت Gann 1x2 لكن فوق 1x1؛ بيع مراقبة وليس قويًا.`}
+    else {dir='RANGE';score=38;reason=`السعر فوق Gann 1x2؛ الهبوط ضعيف أو يحتاج كسر.`}
+  }
+  return {trend,anchorIndex:anchor.i,anchorPrice:anchor.price,anchorType:anchor.type,unit,lines,nearest,dir,score,reason};
+}
+function gannIntersections(g,s){
+  const out=[],levels=[];
+  (s.sup||[]).slice(0,3).forEach(z=>levels.push({type:'SUP',price:z.price}));
+  (s.res||[]).slice(0,3).forEach(z=>levels.push({type:'RES',price:z.price}));
+  (s.sess||[]).slice(-4).forEach(x=>{levels.push({type:x.k.toUpperCase()+' H',price:x.hi});levels.push({type:x.k.toUpperCase()+' L',price:x.lo})});
+  const maxIdx=geom.end+Math.floor((geom.end-geom.start)*.22);
+  for(const ln of g.lines||[]){
+    for(const lev of levels){
+      const denom=(g.trend==='BULL'?1:-1)*g.unit*ln.ratio;
+      if(!denom)continue;
+      const idx=g.anchorIndex+(lev.price-g.anchorPrice)/denom;
+      if(idx>=geom.start&&idx<=maxIdx){
+        out.push({idx,price:lev.price,label:`${ln.label}×${lev.type}`});
+      }
+    }
+  }
+  return out.slice(0,10);
+}
+function targetGuard(s){
+  if(!s||s.dir==='RANGE'||!Number.isFinite(s.entry)||!Number.isFinite(s.sl))return s;
+  const atrv=s.at||Math.abs(s.entry-s.sl);
+  const buffer=Math.max(atrv*.12, symbol.startsWith('XAU')?.8:symbol.startsWith('BTC')?25:.05);
+  const risk=Math.abs(s.entry-s.sl)||1;
+  let obstacles=[];
+  if(s.dir==='BUY'){
+    (s.res||[]).forEach(z=>z.price>s.entry&&obstacles.push({type:'Resistance',price:z.price}));
+    (s.sess||[]).forEach(x=>{[['Asia H',x.hi],['EU H',x.hi],['US H',x.hi]].forEach(([t,p])=>p>s.entry&&obstacles.push({type:t,price:p}))});
+    (s.fg||[]).forEach(f=>f.type==='BEAR'&&f.lo>s.entry&&obstacles.push({type:'FVG Bear',price:f.lo}));
+    (s.obs||[]).forEach(o=>o.type==='SELL'&&o.lo>s.entry&&obstacles.push({type:'OB Sell',price:o.lo}));(s.gann?.lines||[]).forEach(gl=>gl.current>s.entry&&obstacles.push({type:'Gann '+gl.label,price:gl.current}));
+    obstacles=obstacles.sort((a,b)=>a.price-b.price);
+  }else{
+    (s.sup||[]).forEach(z=>z.price<s.entry&&obstacles.push({type:'Support',price:z.price}));
+    (s.sess||[]).forEach(x=>{[['Asia L',x.lo],['EU L',x.lo],['US L',x.lo]].forEach(([t,p])=>p<s.entry&&obstacles.push({type:t,price:p}))});
+    (s.fg||[]).forEach(f=>f.type==='BULL'&&f.hi<s.entry&&obstacles.push({type:'FVG Bull',price:f.hi}));
+    (s.obs||[]).forEach(o=>o.type==='BUY'&&o.hi<s.entry&&obstacles.push({type:'OB Buy',price:o.hi}));(s.gann?.lines||[]).forEach(gl=>gl.current<s.entry&&obstacles.push({type:'Gann '+gl.label,price:gl.current}));
+    obstacles=obstacles.sort((a,b)=>b.price-a.price);
+  }
+  const nearest=obstacles[0];
+  s.targetGuard={ok:true,message:'Target room clear',nearest:null,roomR:null};
+  if(nearest){
+    const room=Math.abs(nearest.price-s.entry);
+    const roomR=room/risk;
+    s.targetGuard={ok:true,nearest,message:`Nearest obstacle: ${nearest.type} ${fmt(nearest.price,2)} = ${fmt(roomR,2)}R`,roomR};
+    if(s.dir==='BUY' && nearest.price<s.tp1){
+      const adjusted=nearest.price-buffer;
+      s.tp1=Math.max(s.entry+risk*.45,adjusted);
+      s.tp2=Math.max(s.tp1+risk*.35,nearest.price+buffer);
+      s.tp3=Math.max(s.tp2+risk*.45,s.entry+risk*1.45);
+      s.targetGuard.adjusted=true;
+      s.targetGuard.message=`TP1 adjusted before ${nearest.type} ${fmt(nearest.price,2)}. Old target was blocked.`;
+    }
+    if(s.dir==='SELL' && nearest.price>s.tp1){
+      const adjusted=nearest.price+buffer;
+      s.tp1=Math.min(s.entry-risk*.45,adjusted);
+      s.tp2=Math.min(s.tp1-risk*.35,nearest.price-buffer);
+      s.tp3=Math.min(s.tp2-risk*.45,s.entry-risk*1.45);
+      s.targetGuard.adjusted=true;
+      s.targetGuard.message=`TP1 adjusted before ${nearest.type} ${fmt(nearest.price,2)}. Old target was blocked.`;
+    }
+    if(roomR<0.65){
+      s.q=Math.max(0,s.q-18);
+      s.targetGuard.ok=false;
+      s.reason=`Target Guard: الهدف قريب جدًا من ${nearest.type} ${fmt(nearest.price,2)} (${fmt(roomR,2)}R). الصفقة تتحول إلى WATCH/NO TRADE إلا إذا حصل اختراق وثبات. `+(s.targetGuard?'<div class="'+(s.targetGuard.ok?'safeGuard':'targetGuard')+'">🎯 '+s.targetGuard.message+'</div>':'')+s.reason;
+    }else if(roomR<1.0){
+      s.q=Math.max(0,s.q-8);
+      s.reason=`Target Guard: مقاومة/دعم قريب قبل الهدف؛ TP1 تم تعديله. `+s.reason;
+    }
+  }
+  return s;
+}
+function reversalAtObstacle(t,p){
+  if(!t||!sig?.targetGuard?.nearest||!Number.isFinite(p))return '';
+  const n=sig.targetGuard.nearest,atrv=sig.at||Math.abs(t.entry-t.sl)||1;
+  const near=Math.abs(p-n.price)<=atrv*.25;
+  if(!near)return '';
+  if(t.dir==='BUY')return `⚠️ السعر قرب ${n.type} ${fmt(n.price,2)}. للشراء: خذ ربح جزئي/BE وانتظر اختراق وثبات فوقها، لأن الرفض قد يعكس السعر.`;
+  return `⚠️ السعر قرب ${n.type} ${fmt(n.price,2)}. للبيع: خذ ربح جزئي/BE وانتظر كسر وثبات تحتها، لأن الرفض قد يعكس السعر.`;
+}
+function analyze(cs,htf){let last=cs.at(-1),cl=cs.map(c=>c.c),e20=ema(cl,20),e50=ema(cl,50),vw=vwap(cs),at=atr(cs).at(-1),rs=rsi(cs),mc=macd(cs),pv=piv(cs),tol=Math.max(at*.35,last.c*.0005),sup=cluster(pv.lo,tol).filter(x=>x.price<last.c).slice(0,4),res=cluster(pv.hi,tol).filter(x=>x.price>last.c).slice(0,4),fg=fvg(cs),obs=ob(cs),sess=sessions(cs),cb=candleBeh(cs);let hc=htf.map(c=>c.c),he20=ema(hc,20),he50=ema(hc,50),hl=htf.at(-1)||last,htfBias=hl.c>he20.at(-1)&&he20.at(-1)>he50.at(-1)?'BUY':hl.c<he20.at(-1)&&he20.at(-1)<he50.at(-1)?'SELL':'RANGE';let schools=[],add=(n,d,s,w='')=>schools.push({n,d,s:Math.round(clamp(s,0,100)),w});add('HTF Bias',htfBias,htfBias==='RANGE'?45:72);add('Candle Behavior',cb.dir,cb.score,cb.reason);let vdir=last.c>vw.at(-1)?'BUY':'SELL';add('VWAP',vdir,Math.abs(last.c-vw.at(-1))/at*40+35);let edir=last.c>e20.at(-1)&&e20.at(-1)>e50.at(-1)?'BUY':last.c<e20.at(-1)&&e20.at(-1)<e50.at(-1)?'SELL':'RANGE';add('EMA 20/50',edir,edir==='RANGE'?45:70);let rdir=rs.at(-1)>56?'BUY':rs.at(-1)<44?'SELL':'RANGE';add('RSI',rdir,Math.abs(rs.at(-1)-50)*2);let mdir=mc.hist.at(-1)>0?'BUY':'SELL';add('MACD',mdir,Math.abs(mc.hist.at(-1))/at*90+40);let ns=sup[0]?Math.abs(last.c-sup[0].price)/at:99,nr=res[0]?Math.abs(last.c-res[0].price)/at:99,zdir=ns<1.1?'BUY':nr<1.1?'SELL':'RANGE';add('Zone S/R',zdir,zdir==='RANGE'?35:80);let lo=obs.at(-1),lf=fg.at(-1),of=lo?.type==='BUY'||lf?.type==='BULL'?'BUY':lo?.type==='SELL'||lf?.type==='BEAR'?'SELL':'RANGE';add('OB/FVG',of,of==='RANGE'?35:65);let gann=gannAnalysis({last,at,pv,e20,e50},cs);add('Gann Fan',gann.dir,gann.score,gann.reason);let baseTmp={last,at,sup,res,sess,schools,fg,obs,gann};let sessL=sessionLiquidityEngine(baseTmp);add('Session Liquidity',sessL.dir,sessL.score,sessL.reason);let fp=smartMoneyFootprint(cs,last,at);add('Smart Footprint',fp.dir,fp.score,fp.reason);let oh=opportunityHunterEngine({...baseTmp,sessionLiquidity:sessL});add('Opportunity Hunter',oh.dir,oh.score,oh.reason);let buy=0,sell=0;schools.forEach(x=>{if(x.d==='BUY')buy+=x.s;if(x.d==='SELL')sell+=x.s});let dir=buy-sell>75?'BUY':sell-buy>75?'SELL':'RANGE',q=clamp(Math.round(Math.max(buy,sell)/(schools.length*80)*100+(cb.dir===dir?15:0)),0,99);if((dir==='BUY'&&htfBias==='SELL'&&cb.score<70)||(dir==='SELL'&&htfBias==='BUY'&&cb.score<70)){dir='RANGE';q=45}let c=cfg(),grade=q>=c.gradeAP?'A+':q>=c.gradeA?'A':q>=c.gradeB?'B':'NO',entry=quote?.mid||last.c,ml=Math.min(...cs.slice(-6).map(c=>c.l)),mh=Math.max(...cs.slice(-6).map(c=>c.h));let sl,tp1,tp2,tp3;if(dir==='BUY'){sl=Math.min(ml,last.l)-at*c.slAtr;let r=entry-sl;tp1=entry+r*c.tp1;tp2=entry+r*c.tp2;tp3=entry+r*c.tp3}if(dir==='SELL'){sl=Math.max(mh,last.h)+at*c.slAtr;let r=sl-entry;tp1=entry-r*c.tp1;tp2=entry-r*c.tp2;tp3=entry-r*c.tp3}let reason=dir==='RANGE'?'لا دخول: ننتظر Sweep/شمعة تأكيد/منطقة أوضح':`${dir}: ${cb.reason} + ${zdir!=='RANGE'?'Zone + ':''}${vdir==='BUY'?'فوق VWAP':'تحت VWAP'}`;return targetGuard({last,e20,e50,vw,at,rs,mc,sup,res,fg,obs,sess,cb,htfBias,schools,dir,q,grade,entry,sl,tp1,tp2,tp3,reason,modeName:cfg().name,modeCfg:cfg(),gann,sessionLiquidity:sessL,footprint:fp,opportunity:oh,technical:technicalSchoolSummary({schools})})}
+
+function hybridPanelHtml(s){
+  const item=(name,dir,score,txt)=>`<div class="hybridItem"><b>${name}: ${dir||'RANGE'} ${score!=null?score+'%':''}</b><small>${txt||'---'}</small></div>`;
+  return [
+    item('Technical Schools',s.technical?.leader,'',s.technical?.text),
+    item('Session Liquidity',s.sessionLiquidity?.dir,s.sessionLiquidity?.score,s.sessionLiquidity?.reason),
+    item('Smart Money Footprint',s.footprint?.dir,s.footprint?.score,(s.footprint?.reason||'')+' | '+(s.footprint?.source||externalIntel.message)),
+    item('Opportunity Hunter',s.opportunity?.dir,s.opportunity?.score,s.opportunity?.reason),
+    item('Risk/Journal/Backtest',s.dir,s.q,`Mode ${cfg().name} | Release ${cfg().release} | BT target ${cfg().btWin}`)
+  ].join('');
+}
+function panels(){let s=sig;if(!s)return;$('grade').textContent=s.grade;$('htf').textContent=s.htfBias;$('trigger').textContent=s.locked?('LOCKED '+(s.lockStatus||'')):(s.watch?(s.watchLevel+' '+s.watchDir):s.cb.reason);$('quality').textContent=s.q+'%';$('decision').textContent=s.locked?('🔒 '+s.dir):(s.watch?(s.watchLevel+' '+s.watchDir):(s.suppressed?'NO TRADE':s.dir));$('decision').style.color=s.dir==='BUY'?'var(--g)':s.dir==='SELL'?'var(--r)':'var(--y)';$('side').textContent=s.locked?('🔒 '+s.dir):(s.watch?(s.watchLevel+' '+s.watchDir):(s.suppressed?'NO TRADE':s.dir));['entry','sl','tp1','tp2','tp3','be'].forEach(id=>$(id).textContent=s[id]?fmt(s[id],2):'---');$('be').textContent=s.entry&&s.dir!=='RANGE'?fmt(s.entry,2):'---';$('risk').textContent=s.sl?fmt(Math.abs(s.entry-s.sl),2):'---';$('rr').textContent=s.tp2?fmt(Math.abs(s.tp2-s.entry)/Math.abs(s.entry-s.sl),2):'---';$('inv').textContent=s.sl?fmt(s.sl,2):'---';$('modeRule').textContent=cfg().name+' trade ≥ '+cfg().trade+'%';$('lockRule').textContent='Release: '+cfg().release;$('newsTape').textContent=newsNarrative(s);$('hybridPanels').innerHTML=hybridPanelHtml(s);$('alertBox').innerHTML=(s.locked?'<div class="lockedNote">🔒 الصفقة مقفلة — لا توجد إشارة جديدة حتى TP3 أو SL<br>الحالة: '+(s.lockStatus||'ACTIVE')+'<br>Entry/SL/TP ثابتة ولا تتغير مع السعر<br>📄 تقرير الدخول جاهز من زر تقرير الدخول</div>':'') + (s.gann?'<div class="gannNote">📐 '+s.gann.reason+'<br>Anchor: '+s.gann.anchorType+' '+fmt(s.gann.anchorPrice,2)+' | Nearest: '+s.gann.nearest.label+' '+fmt(s.gann.nearest.current,2)+'</div>':'') + (s.footprint?'<div class="footprintNote">👣 '+s.footprint.reason+'</div>':'') + (s.opportunity?'<div class="opportunityNote">🎯 '+s.opportunity.reason+'</div>':'') + s.reason;$('candleBox').innerHTML=s.cb.list.slice(-6).map(x=>`<div class=school><span class=n>${x.name}<small style=display:block>${x.why}</small></span><span class="tag ${x.dir==='BUY'?'buy':x.dir==='SELL'?'sell':'range'}">${x.dir} ${x.pts}</span></div>`).join('')||'لا نمط واضح';$('schools').innerHTML=s.schools.map(x=>`<div class=school><span class=n>${x.n}</span><span class="tag ${x.d==='BUY'?'buy':x.d==='SELL'?'sell':'range'}">${x.d} ${x.s}</span></div>`).join('');let ov=$('ov');ov.querySelector('.sig').className='sig '+(s.dir==='BUY'?'buy':s.dir==='SELL'?'sell':'range');ov.querySelector('.sig').textContent=s.locked?('🔒 '+s.dir+' '+s.q+'%'):(s.watch?(s.watchLevel+' '+s.watchDir+' '+s.q+'%'):(s.suppressed?('NO TRADE '+s.q+'%'):(s.dir+' '+s.q+'%')));ov.querySelector('.why').textContent=s.reason;track()}
+function track(){if(!sig||!quote||sig.dir==='RANGE'){tstat.textContent=sig?.cooldown?'COOLDOWN':(sig?.watch?'WATCH':(sig?.suppressed?'NO TRADE':'WAIT'));pl.textContent='---';return}let p=quote.mid,st=activeTrade?evalTradeStatus(activeTrade,p):'ACTIVE';if(sig.dir==='BUY'){if(p>=sig.tp3)st='TP3 HIT';else if(p>=sig.tp2)st='TP2 HIT';else if(p>=sig.tp1)st='TP1 HIT → BE';else if(p<=sig.sl)st='SL HIT'}else{if(p<=sig.tp3)st='TP3 HIT';else if(p<=sig.tp2)st='TP2 HIT';else if(p<=sig.tp1)st='TP1 HIT → BE';else if(p>=sig.sl)st='SL HIT'}if(activeTrade){activeTrade.lastStatus=st;activeTrade.lastPrice=p;saveActiveTrade();if(st==='SL HIT'||st===(activeTrade.releaseAt||cfg(activeTrade.mode||mode).release)+' HIT'){closeActiveTrade(st,p)}}
+tstat.textContent=st;let x=sig.dir==='BUY'?p-sig.entry:sig.entry-p;pl.textContent=fmt(x,2);follow.innerHTML=`<div class=line><span>Price</span><b>${fmt(p,2)}</b></div><div class=line><span>To TP1</span><b>${fmt(Math.abs(sig.tp1-p),2)}</b></div><div class=line><span>To SL</span><b>${fmt(Math.abs(p-sig.sl),2)}</b></div><div class=line><span>Status</span><b>${st}</b></div><div class=line><span>Mode</span><b>${cfg(activeTrade?.mode||mode).name}</b></div><div class=line><span>Release</span><b>${activeTrade?.releaseAt||cfg().release}</b></div><div class=line><span>Footprint</span><b>${sig.footprint?.dir||'---'} ${sig.footprint?.score||''}</b></div><div class=line><span>Opportunity</span><b>${sig.opportunity?.dir||'---'} ${sig.opportunity?.score||''}</b></div>${reversalAtObstacle(activeTrade,p)?'<div class=targetGuard>'+reversalAtObstacle(activeTrade,p)+'</div>':''}`}
+
+function liveCandles(){
+  if(!candles.length||!quote)return candles;
+  const a=candles.map(x=>({...x}));
+  const i=a.length-1,p=quote.mid;
+  a[i].c=p;a[i].h=Math.max(a[i].h,p);a[i].l=Math.min(a[i].l,p);a[i].state='live';
+  return a;
+}
+function liquidityLevels(s){
+  if(!s)return [];
+  const out=[];
+  (s.res||[]).slice(0,3).forEach(z=>out.push({side:'SELL LIQ',price:z.price,color:'#0ea5e9'}));
+  (s.sup||[]).slice(0,3).forEach(z=>out.push({side:'BUY LIQ',price:z.price,color:'#a855f7'}));
+  return out;
+}
+function newsNarrative(s){
+  if(!s)return 'بانتظار تحليل السوق...';
+  const px=quote?.mid||s.last?.c, nearSup=s.sup?.[0]?.price, nearRes=s.res?.[0]?.price, gtxt=s.gann?.nearest?` Gann ${s.gann.nearest.label} عند ${fmt(s.gann.nearest.current,2)}.`:'';
+  if(s.locked)return `🔒 صفقة ${s.dir} مقفلة: نتابع ${s.lockStatus||'ACTIVE'} — ${s.targetGuard?.nearest?'أقرب عائق '+s.targetGuard.nearest.type+' '+fmt(s.targetGuard.nearest.price,2):'الهدف التالي حسب الخطة'} | ${s.footprint?.reason||''} | ${s.opportunity?.reason||''}`;
+  if(s.suppressed)return `NO TRADE: النسبة ${s.q}% ضعيفة. ننتظر Sweep أو شمعة تأكيد عند منطقة واضحة.`;
+  if(s.watch)return `${s.watchLevel}: ${s.watchDir} ${s.q}%. ${s.opportunity?.reason||'نراقب شمعة تأكيد'} | ${s.footprint?.reason||''}`;
+  if(s.dir==='RANGE'){
+    let txt='السوق عرضي: ننتظر خروجًا مؤكدًا من النطاق أو Sweep ثم عودة.';
+    if(nearRes)txt+=` مقاومة قريبة ${fmt(nearRes,2)}؛ اختراق وثبات فوقها يدعم الصعود.`;
+    if(nearSup)txt+=` دعم قريب ${fmt(nearSup,2)}؛ كسره وثبات تحته يدعم الهبوط.`;
+    return txt+gtxt;
+  }
+  return `${s.dir} ${s.q}%: العوامل تشير إلى ${s.dir}. ${s.targetGuard?.nearest?'انتبه للعائق الأقرب '+s.targetGuard.nearest.type+' '+fmt(s.targetGuard.nearest.price,2)+'. ':''}الثبات بعد الاختراق مهم، وإلغاء الفكرة عند SL ${fmt(s.sl,2)}.${gtxt}`;
+}
+function drawAll(){try{drawChart();mini($('rsi'), sig?.rs||[],0,100,'RSI');mini($('macd'), sig?.mc?.hist||[],-1,1,'MACD')}catch(e){console.warn('draw error',e)}}
+function g(canvas,cs){let d=Math.min(devicePixelRatio||1,2),r=canvas.getBoundingClientRect();canvas.width=r.width*d;canvas.height=r.height*d;let ctx=canvas.getContext('2d');ctx.setTransform(d,0,0,d,0,0);let w=r.width,h=r.height,p={l:44,r:94,t:22,b:30},end=cs.length-off,start=Math.max(0,end-view),sl=cs.slice(start,end),hi=Math.max(...sl.map(c=>c.h),...(sig?[sig.tp1,sig.tp2,sig.tp3,sig.sl].filter(Boolean):[])),lo=Math.min(...sl.map(c=>c.l),...(sig?[sig.tp1,sig.tp2,sig.tp3,sig.sl].filter(Boolean):[])),max=hi+(hi-lo)*.08,min=lo-(hi-lo)*.08,vw=w-p.l-p.r,vh=h-p.t-p.b,rightGap=6,x=i=>p.l+(i-start+.5)*vw/Math.max(1,end-start+rightGap),y=v=>p.t+(max-v)/(max-min)*vh;return{ctx,w,h,p,start,end,sl,max,min,vw,vh,rightGap,x,y}}
+function drawChart(){if(!candles.length)return;const drawCandles=liveCandles();geom=g($('chart'),drawCandles);let {ctx,w,h,p,sl,start,end,x,y}=geom;ctx.fillStyle='#f8fafc';ctx.fillRect(0,0,w,h);ctx.fillStyle='#eef2f7';ctx.fillRect(w-p.r,0,p.r,h);ctx.strokeStyle='rgba(100,116,139,.22)';ctx.fillStyle='#475569';ctx.font='10px JetBrains Mono';ctx.textAlign='right';for(let i=0;i<=8;i++){let yy=p.t+i*(h-p.t-p.b)/8;ctx.beginPath();ctx.moveTo(p.l,yy);ctx.lineTo(w-p.r,yy);ctx.stroke();ctx.fillText(fmt(geom.max-(geom.max-geom.min)*i/8,2),w-6,yy+3)}for(let i=0;i<=10;i++){let xx=p.l+i*(w-p.l-p.r)/10;ctx.beginPath();ctx.moveTo(xx,p.t);ctx.lineTo(xx,h-p.b);ctx.stroke()}if(sig){if(layers.support)sr(ctx,sig.sup,'SUPPORT','#16a34a');if(layers.resistance)sr(ctx,sig.res,'RESISTANCE','#dc2626');if(layers.sessionAsia||layers.sessionEu||layers.sessionUs)ses(ctx,sig.sess);if(layers.fvgBull||layers.fvgBear)boxes(ctx,sig.fg,'FVG');if(layers.obBuy||layers.obSell)boxes(ctx,sig.obs,'OB');if(layers.liquidity)liq(ctx,liquidityLevels(sig));if(layers.gann&&sig.gann)gannDraw(ctx,sig.gann,sig);if(layers.vwap)line(ctx,sig.vw,'#7c3aed');if(layers.ema){line(ctx,sig.e20,'#f59e0b');line(ctx,sig.e50,'#2563eb')}}let bw=Math.max(2,geom.vw/Math.max(20,end-start)*.62);sl.forEach((k,j)=>{let xx=x(start+j),up=k.c>=k.o,col=up?'#16a34a':'#dc2626';ctx.strokeStyle=col;ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(xx,y(k.h));ctx.lineTo(xx,y(k.l));ctx.stroke();ctx.fillRect(xx-bw/2,Math.min(y(k.o),y(k.c)),bw,Math.max(1,Math.abs(y(k.o)-y(k.c))))});if(sig){tradeLines(ctx);if(layers.signals)drawSig(ctx);if(layers.candle)ctx.fillText(sig.cb.reason,x(end-2)-80,y(sig.last.c)-18)}price(ctx,quote?.mid||sig?.last.c||candles.at(-1).c)}
+function line(ctx,a,col){ctx.save();ctx.strokeStyle=col;ctx.lineWidth=1.8;ctx.beginPath();for(let i=geom.start;i<geom.end;i++){let v=a[i];if(!Number.isFinite(v))continue;let xx=geom.x(i),yy=geom.y(v);i===geom.start?ctx.moveTo(xx,yy):ctx.lineTo(xx,yy)}ctx.stroke();ctx.restore()}
+function sr(ctx,a,label,col){a.slice(0,4).forEach(z=>{let yy=geom.y(z.price);ctx.save();ctx.strokeStyle=col;ctx.setLineDash([7,5]);ctx.beginPath();ctx.moveTo(geom.p.l,yy);ctx.lineTo(geom.p.l+geom.vw,yy);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle=col;ctx.font='900 9px JetBrains Mono';ctx.textAlign='left';ctx.fillText(`${label} ${fmt(z.price,2)}`,geom.p.l+8,yy-5);ctx.restore()})}
+function boxes(ctx,a,label){a.slice(-8).forEach(b=>{let is=b.type==='BUY'||b.type==='BULL';if(label==='FVG'&&((is&&!layers.fvgBull)||(!is&&!layers.fvgBear)))return;if(label==='OB'&&((is&&!layers.obBuy)||(!is&&!layers.obSell)))return;let xx=geom.x(Math.max(geom.start,b.i)),w=geom.p.l+geom.vw-xx,yy=geom.y(b.hi||b.h),hh=geom.y(b.lo||b.l)-yy;ctx.save();ctx.fillStyle=is?'rgba(34,197,94,.12)':'rgba(239,68,68,.12)';ctx.strokeStyle=is?'#16a34a':'#dc2626';ctx.fillRect(xx,yy,w,hh);ctx.strokeRect(xx,yy,w,hh);ctx.fillStyle=ctx.strokeStyle;ctx.font='900 10px JetBrains Mono';ctx.fillText(`${label} ${b.type}`,xx+5,yy+14);ctx.restore()})}
+function ses(ctx,a){a.forEach(s=>{if(s.k==='asia'&&!layers.sessionAsia)return;if(s.k==='eu'&&!layers.sessionEu)return;if(s.k==='us'&&!layers.sessionUs)return;[['H',s.hi],['L',s.lo]].forEach(([k,p])=>{let yy=geom.y(p);ctx.save();ctx.strokeStyle='#f59e0b';ctx.setLineDash([5,5]);ctx.beginPath();ctx.moveTo(geom.p.l,yy);ctx.lineTo(geom.p.l+geom.vw,yy);ctx.stroke();ctx.fillStyle='#f59e0b';ctx.font='900 9px JetBrains Mono';ctx.textAlign='right';ctx.fillText(`${s.k.toUpperCase()} ${k} ${fmt(p,2)} ${s.day.slice(5)}`,geom.p.l+geom.vw-5,yy-4);ctx.restore()})})}
+
+function gannDraw(ctx,g,s){
+  ctx.save();
+  const colors={.25:'#a78bfa',.5:'#8b5cf6',1:'#6d28d9',2:'#7c3aed',4:'#c084fc'};
+  for(const ln of g.lines||[]){
+    const y1=geom.y(gannLinePrice(g,geom.start,ln.ratio)), y2=geom.y(gannLinePrice(g,geom.end+8,ln.ratio));
+    ctx.strokeStyle=colors[ln.ratio]||'#7c3aed';ctx.lineWidth=ln.ratio===1?2.2:1.2;ctx.setLineDash(ln.ratio===1?[]:[7,5]);
+    ctx.beginPath();ctx.moveTo(geom.x(geom.start),y1);ctx.lineTo(geom.x(geom.end+8),y2);ctx.stroke();
+    ctx.setLineDash([]);ctx.fillStyle=colors[ln.ratio]||'#7c3aed';ctx.font='900 9px JetBrains Mono';ctx.textAlign='right';
+    ctx.fillText(`Gann ${ln.label}`,geom.p.l+geom.vw-6,y2-4);
+  }
+  ctx.fillStyle='#6d28d9';ctx.font='900 9px JetBrains Mono';ctx.textAlign='left';
+  const ax=geom.x(g.anchorIndex), ay=geom.y(g.anchorPrice);
+  if(ax>=geom.p.l&&ax<=geom.p.l+geom.vw){ctx.beginPath();ctx.arc(ax,ay,4,0,Math.PI*2);ctx.fill();ctx.fillText(`GANN ${g.anchorType} ${fmt(g.anchorPrice,2)}`,ax+6,ay-6)}
+  for(const it of gannIntersections(g,s)){
+    const xx=geom.x(it.idx), yy=geom.y(it.price);
+    ctx.fillStyle='#f59e0b';ctx.beginPath();ctx.arc(xx,yy,3.5,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#92400e';ctx.fillText(it.label,xx+5,yy-5);
+  }
+  ctx.restore();
+}
+function liq(ctx,a){a.forEach(z=>{let yy=geom.y(z.price);ctx.save();ctx.strokeStyle=z.color;ctx.setLineDash([2,6]);ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(geom.p.l,yy);ctx.lineTo(geom.p.l+geom.vw,yy);ctx.stroke();ctx.fillStyle=z.color;ctx.font='900 9px JetBrains Mono';ctx.textAlign='left';ctx.fillText(`${z.side} ${fmt(z.price,2)}`,geom.p.l+8,yy+12);ctx.restore()})}
+function price(ctx,p){let yy=geom.y(p),x=geom.p.l+geom.vw+4,w=geom.p.r-8;ctx.save();ctx.strokeStyle='#16a34a';ctx.setLineDash([2,3]);ctx.beginPath();ctx.moveTo(geom.p.l,yy);ctx.lineTo(geom.p.l+geom.vw,yy);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle='#16a34a';ctx.fillRect(x,yy-15,w,30);ctx.fillStyle='white';ctx.textAlign='center';ctx.font='900 10px JetBrains Mono';ctx.fillText(fmt(p,2),x+w/2,yy-1);ctx.font='8px JetBrains Mono';ctx.fillText(new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),x+w/2,yy+10);ctx.restore()}
+function tradeLines(ctx){if(sig.dir==='RANGE')return;[['ENTRY',sig.entry,'#0ea5e9'],['SL',sig.sl,'#dc2626'],['TP1',sig.tp1,'#16a34a'],['TP2',sig.tp2,'#16a34a'],['TP3',sig.tp3,'#16a34a']].forEach(([n,p,col])=>{let yy=geom.y(p);ctx.save();ctx.strokeStyle=col;ctx.setLineDash(n==='ENTRY'?[]:[8,5]);ctx.beginPath();ctx.moveTo(geom.p.l,yy);ctx.lineTo(geom.p.l+geom.vw,yy);ctx.stroke();ctx.fillStyle=col;ctx.font='900 10px JetBrains Mono';ctx.fillText(`${n} ${fmt(p,2)}`,geom.p.l+geom.vw-170,yy-5);ctx.restore()})}
+function drawSig(ctx){
+  if(sig?.suppressed||sig?.dir==='RANGE')return;
+  const showDir=sig.watch?sig.watchDir:sig.dir;
+  if(showDir==='RANGE')return;
+  let xx=geom.x(geom.end-1),yy=showDir==='SELL'?geom.y(sig.last.h)-22:geom.y(sig.last.l)+26,col=showDir==='BUY'?'#16a34a':'#dc2626';
+  ctx.save();ctx.fillStyle=col;ctx.font='900 22px JetBrains Mono';ctx.textAlign='center';
+  ctx.fillText(sig.watch?'◆':(showDir==='BUY'?'▲':'▼'),xx,yy);
+  ctx.fillStyle='rgba(255,255,255,.96)';ctx.strokeStyle=col;ctx.beginPath();ctx.roundRect(Math.max(geom.p.l+5,xx-84),yy+(showDir==='SELL'?-48:8),168,30,9);ctx.fill();ctx.stroke();
+  ctx.fillStyle=col;ctx.font='900 11px JetBrains Mono';
+  const label=sig.locked?`🔒 ${showDir} ${sig.q}%`:sig.watch?`${sig.watchLevel} ${showDir} ${sig.q}%`:`${showDir} ${sig.q}%`;
+  ctx.fillText(label,Math.min(geom.p.l+geom.vw-90,Math.max(geom.p.l+84,xx)),yy+(showDir==='SELL'?-29:28));ctx.restore()
+}
+function mini(canvas,a,min0,max0,label){
+  let d=Math.min(devicePixelRatio||1,2),r=canvas.getBoundingClientRect();canvas.width=r.width*d;canvas.height=r.height*d;let ctx=canvas.getContext('2d');ctx.setTransform(d,0,0,d,0,0);
+  ctx.fillStyle='#eef2f7';ctx.fillRect(0,0,r.width,r.height);
+  ctx.fillStyle='#0f172a';ctx.font='900 12px JetBrains Mono';ctx.fillText(label,8,16);
+  if(!a.length)return;let vals=a.slice(-view).filter(Number.isFinite),mn=Math.min(...vals,min0),mx=Math.max(...vals,max0);
+  ctx.strokeStyle='rgba(100,116,139,.28)';for(let i=0;i<3;i++){let y=28+i*(r.height-52)/2;ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(r.width,y);ctx.stroke()}
+  ctx.strokeStyle='#60a5fa';ctx.lineWidth=2;ctx.beginPath();vals.forEach((v,i)=>{let x=i*r.width/Math.max(1,vals.length-1),y=24+(mx-v)/(mx-mn)*(r.height-50);i?ctx.lineTo(x,y):ctx.moveTo(x,y)});ctx.stroke();
+  const last=vals.at(-1);ctx.fillStyle='#334155';ctx.font='800 10px JetBrains Mono';ctx.fillText(`${label}: ${fmt(last,2)}`,8,r.height-25);
+  ctx.font='800 10px Cairo';ctx.fillStyle='#475569';
+  const guide=label==='RSI'?'دليل: فوق 70 تشبع شراء • تحت 30 تشبع بيع • 45-55 حياد':'دليل: فوق 0 زخم صاعد • تحت 0 زخم هابط • تقاطع الخطوط يؤكد';
+  ctx.fillText(guide,8,r.height-8);
+}
+function zoom(f){view=clamp(Math.round(view/f),40,500);drawAll()}function pan(n){off=clamp(off+n,0,Math.max(0,candles.length-view));drawAll()}function resetView(){off=0;view=170;drawAll()}function toggleLayer(k){layers[k]=!layers[k];document.querySelector(`[data-layer="${k}"]`)?.classList.toggle('on',layers[k]);drawAll()}function saveHD(){let a=document.createElement('a');a.download=`${symbol}_${tf}_SCALP_HD.png`;a.href=$('chart').toDataURL('image/png');a.click()}function saveSettings(){candlesApi=candlesApi.value||'/api/metaapi-candles';priceApi=priceApi.value||'/api/metaapi-price'}function toggleSound(){audio=!audio;sound.textContent=audio?'الصوت ON':'الصوت OFF'}function clearLockedTrade(){activeTrade=null;saveActiveTrade();signalCooldownUntil=Date.now()+cfg().cooldown*1000;localStorage.scalp_cooldown_until=String(signalCooldownUntil);alert('تم إنهاء الصفقة المقفلة يدويًا.');load()}
+function logProposedTrade(t){
+  const list=JSON.parse(localStorage.scalp_all_suggestions||'[]');
+  list.push({id:t.createdAt||Date.now(),time:new Date(t.createdAt||Date.now()).toISOString(),symbol:t.symbol,tf:t.tf,mode:t.mode,dir:t.dir,q:t.q,entry:t.entry,sl:t.sl,tp1:t.tp1,tp2:t.tp2,tp3:t.tp3,reason:t.reason,candle:t.candle,status:t.status||'ACTIVE'});
+  localStorage.scalp_all_suggestions=JSON.stringify(list.slice(-500));
+}
+function saveSignal(){if(!sig||sig.dir==='RANGE')return alert('لا توجد صفقة مؤكدة. القفل والدخول فقط من ${c.trade}% وما فوق.');if(activeTrade)return alert('هناك صفقة مقفلة قيد المتابعة. لا يمكن حفظ صفقة ثانية قبل انتهاء الأولى.');let s=JSON.parse(localStorage.scalp_saved||'[]');s.push({time:Date.now(),symbol,tf,dir:sig.dir,entry:sig.entry,sl:sig.sl,tp1:sig.tp1,tp2:sig.tp2,tp3:sig.tp3,reason:sig.reason,reportText:activeTrade?.reportText||''});localStorage.scalp_saved=JSON.stringify(s);saved.textContent=s.length}function exportJournal(){let b=new Blob([localStorage.scalp_all_suggestions||localStorage.scalp_saved||'[]'],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='scalp_journal.json';a.click()}
+function parseNum(v){return Number(String(v??'').replace(/,/g,'').trim())}function csvLine(l){let o=[],c='',q=false;for(let i=0;i<l.length;i++){let ch=l[i];if(ch=='"'&&l[i+1]=='"'){c+='"';i++;continue}if(ch=='"'){q=!q;continue}if(ch==','&&!q){o.push(c);c='';continue}c+=ch}o.push(c);return o}
+function nfile(r){let get=(...ks)=>{for(let k of ks){if(r[k]!=null)return r[k];let kk=Object.keys(r).find(x=>x.toLowerCase().trim()==String(k).toLowerCase());if(kk)return r[kk]}};let tr=get('time','date','datetime','timestamp','brokerTime'),t=Number(tr);if(!Number.isFinite(t)||String(tr).length<10)t=Date.parse(String(tr).replace(' ','T'));if(Number.isFinite(t)&&t<1e10)t*=1000;return{t,o:parseNum(get('open','o')),h:parseNum(get('high','h')),l:parseNum(get('low','l')),c:parseNum(get('close','c')),v:parseNum(get('volume','tickVolume','v'))||1,state:'complete'}}
+async function readFile(){let f=btFile.files[0];if(!f)return null;let tx=await f.text(),rows=[];if(f.name.endsWith('.json')||tx.trim().startsWith('[')){let j=JSON.parse(tx);rows=Array.isArray(j)?j:(j.candles||j.data||[])}else{let lines=tx.split(/\r?\n/).filter(x=>x.trim()),h=csvLine(lines.shift()).map(x=>x.trim());rows=lines.map(l=>{let v=csvLine(l),o={};h.forEach((x,i)=>o[x]=v[i]);return o})}let cs=rows.map(nfile).filter(c=>Number.isFinite(c.t)&&Number.isFinite(c.o)&&Number.isFinite(c.h)&&Number.isFinite(c.l)&&Number.isFinite(c.c)).sort((a,b)=>a.t-b.t);if(!cs.length)throw Error('No valid candles in file');return cs}
+function fdates(cs){let f=btFrom.value?new Date(btFrom.value+'T00:00:00').getTime():-Infinity,t=btTo.value?new Date(btTo.value+'T23:59:59').getTime():Infinity;if(f>t){let x=f;f=t;t=x}return cs.filter(c=>c.t>=f&&c.t<=t)}
+async function runBT(){lastBT=[];btResult.textContent='Loading...';try{let cs=await readFile();if(!cs)cs=candles;cs=fdates(cs);if(!cs||cs.length<120)throw Error(`Not enough candles: ${cs?cs.length:0}. ارفع ملف شموع أو انتظر تحميل الشارت.`);let wins=0,loss=0,open=0,tr=0,bttf=btTf.value,c=cfg(),jump=bttf==='1m'?(mode==='aggressive'?10:15):bttf==='5m'?(mode==='aggressive'?4:5):2,fw=bttf==='1m'?(mode==='conservative'?90:60):bttf==='5m'?(mode==='conservative'?60:42):34;for(let i=90;i<cs.length-20;i+=jump){let a=analyze(cs.slice(0,i),cs.slice(0,i));let g=applyThresholdGate(a);if(!g||!g.tradeAllowed||g.dir==='RANGE')continue;tr++;let res='OPEN',exit='',etime='',mfe=0,mae=0,target=g[c.btWin.toLowerCase()]||g.tp2;for(let j=i;j<Math.min(cs.length,i+fw);j++){let k=cs[j],fav=g.dir==='BUY'?k.h-g.entry:g.entry-k.l,adv=g.dir==='BUY'?g.entry-k.l:k.h-g.entry;mfe=Math.max(mfe,fav);mae=Math.max(mae,adv);if(g.dir==='BUY'&&k.l<=g.sl){res='LOSS';exit=g.sl;etime=k.t;break}if(g.dir==='BUY'&&k.h>=target){res='WIN';exit=target;etime=k.t;break}if(g.dir==='SELL'&&k.h>=g.sl){res='LOSS';exit=g.sl;etime=k.t;break}if(g.dir==='SELL'&&k.l<=target){res='WIN';exit=target;etime=k.t;break}}res==='WIN'?wins++:res==='LOSS'?loss++:open++;lastBT.push({symbol,tf:bttf,mode:c.name,btWin:c.btWin,release:c.release,time:new Date(cs[i-1].t).toLocaleString('en-GB'),dir:g.dir,grade:g.grade,q:g.q,entry:fmt(g.entry,2),sl:fmt(g.sl,2),tp1:fmt(g.tp1,2),tp2:fmt(g.tp2,2),tp3:fmt(g.tp3,2),res,exit:exit?fmt(exit,2):'',etime:etime?new Date(etime).toLocaleString('en-GB'):'',mfe:fmt(mfe,2),mae:fmt(mae,2),candle:g.cb.reason,failure:res==='LOSS'?'SL hit: setup failed after signal / adverse move exceeded risk':'',targetGuard:g.targetGuard?.message||'',gann:g.gann?.reason||'',failure:res==='LOSS'?'SL hit: setup failed / nearest obstacle or reversal invalidated the model':'',reason:g.reason})}let wr=(wins+loss)?wins/(wins+loss)*100:0;btResult.textContent=`Mode: ${c.name}
+Rule: Watch ${c.display}% / Alert ${c.alert}% / Trade ${c.trade}%+
+Backtest target: ${c.btWin}
+Lock release: ${c.release}
+
+Candles: ${cs.length}
+Trades: ${tr}
+Wins: ${wins}
+Losses: ${loss}
+Open: ${open}
+Win Rate Closed: ${fmt(wr,1)}%
+
+Export Excel جاهز.`}catch(e){btResult.textContent='ERROR:\n'+(e.message||e)}}
+function exportBT(){if(!lastBT.length)return alert('شغّل Backtest أولًا');let esc=s=>String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;'),html='<html><meta charset=utf-8><body><table border=1><tr>';['#','Symbol','TF','Mode','BT Target','Release','Time','Dir','Grade','Quality','Entry','SL','TP1','TP2','TP3','Result','Exit','Exit Time','MFE','MAE','Candle','Target Guard','Gann','Failure Cause','Reason'].forEach(h=>html+=`<th>${h}</th>`);html+='</tr>';lastBT.forEach((t,i)=>html+=`<tr><td>${i+1}</td><td>${esc(t.symbol)}</td><td>${esc(t.tf)}</td><td>${esc(t.mode)}</td><td>${esc(t.btWin)}</td><td>${esc(t.release)}</td><td>${esc(t.time)}</td><td>${t.dir}</td><td>${t.grade}</td><td>${t.q}</td><td>${t.entry}</td><td>${t.sl}</td><td>${t.tp1}</td><td>${t.tp2}</td><td>${t.tp3}</td><td>${t.res}</td><td>${t.exit}</td><td>${esc(t.etime)}</td><td>${t.mfe}</td><td>${t.mae}</td><td>${esc(t.candle)}</td><td>${esc(t.targetGuard)}</td><td>${esc(t.gann)}</td><td>${esc(t.failure)}</td><td>${esc(t.reason)}</td></tr>`);html+='</table></body></html>';let b=new Blob([html],{type:'application/vnd.ms-excel;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`scalp_backtest_${symbol}.xls`;a.click()}
+function openBT(){let to=new Date(),fr=new Date(to-30*86400000);btTo.value=to.toISOString().slice(0,10);btFrom.value=fr.toISOString().slice(0,10);btModal.classList.add('open')}function closeBT(){btModal.classList.remove('open')}
+asset.onchange=e=>{symbol=e.target.value;localStorage.scalp_symbol=symbol;load();refreshQ()};mode.onchange=e=>{mode=e.target.value;localStorage.scalp_mode=mode;load()};document.querySelectorAll('.tf').forEach(b=>b.onclick=()=>{tf=b.dataset.tf;localStorage.scalp_tf=tf;document.querySelectorAll('.tf').forEach(x=>x.classList.toggle('active',x.dataset.tf===tf));load()});
+function init(){asset.value=symbol;mode.value=mode;document.querySelectorAll('.tf').forEach(x=>x.classList.toggle('active',x.dataset.tf===tf));load().then(refreshQ);setInterval(refreshQ,2000);setInterval(load,30000);setInterval(()=>refreshExternalIntel().then(()=>{if(sig){sig=attachHybridModules(sig,candles);panels();drawAll()}}),10000);saved.textContent=JSON.parse(localStorage.scalp_saved||'[]').length}
+init();
+</script></body></html>
