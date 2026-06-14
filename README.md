@@ -1,33 +1,26 @@
-# XAU / BTC / XAG SCALP EXECUTION ENGINE V12.4.1 — Hobby Safe
+# XAU / BTC / XAG SCALP EXECUTION ENGINE V12.4.2 — Magic + Integrity
 
-This version fixes Vercel Hobby deployment limit.
+New:
+- Stable Breaking Tape: moving ticker no longer restarts every refresh and no flickering color.
+- Magic Button / الزر السحري:
+  - Detects range or trend.
+  - Calculates range high/low, duration, touches, price location.
+  - Reads candle behavior, liquidity, footprint, HTF, target guard.
+  - Gives next direction probability, target, invalidation, time horizon.
+  - Warns about manipulation: sweeps, long wicks, footprint/candle conflict, false breakout risk.
+  - Draws Magic support/resistance/target/invalidation on chart.
+- Backtest Integrity Fix:
+  - Target Guard hard block.
+  - XAU/XAG liquidity sweep = watch only unless retest/confirmation.
+  - No overlapping trades.
+  - HTF aggregation for backtest.
+  - Estimated cost/slippage.
+  - Better loss-cause report.
 
-Vercel Hobby error reason:
-Previous build had more than 12 files inside /api, so Vercel counted them as Serverless Functions.
+Hobby Safe API retained:
+- /api/metaapi
+- /api/binance
+- /api/journal
+- /api/worker-track-trades
 
-Now /api contains only 4 functions:
-- metaapi.js
-- binance.js
-- journal.js
-- worker-track-trades.js
-
-Everything remains:
-- Breaking ticker
-- Fast Impulse Sniper
-- Supabase Auto Journal
-- Backtest Lab
-- Worker tracking
-- Strict routing:
-  - BTCUSDT = Binance only
-  - BTCUSD = MetaAPI only
-  - XAUUSD/XAGUSD = MetaAPI only
-
-Upload full ZIP contents to GitHub, then Redeploy Vercel.
-Open with ?v=1241 to avoid iPhone/Safari cache.
-
-Test endpoints:
-- /api/metaapi?symbol=XAUUSD
-- /api/metaapi?symbol=XAUUSD&timeframe=5m&limit=10
-- /api/binance?type=price&symbol=BTCUSDT
-- /api/binance?type=klines&symbol=BTCUSDT&timeframe=5m&limit=10
-- /api/journal?action=open
+Open with ?v=1242 after deploy.
