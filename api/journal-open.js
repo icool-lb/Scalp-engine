@@ -1,0 +1,2 @@
+const {available,sb}=require('./_supabase');
+module.exports=async function(req,res){try{if(!available())return res.status(200).json({ok:false,disabled:true,error:'Supabase env missing'});const open=await sb('trades?status=eq.ACTIVE&select=*&order=opened_at.desc&limit=50');res.status(200).json({ok:true,open})}catch(e){res.status(e.disabled?200:500).json({ok:false,disabled:!!e.disabled,error:e.message})}}
