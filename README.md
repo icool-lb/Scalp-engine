@@ -1,32 +1,37 @@
-# XAU / BTC / XAG SCALP EXECUTION ENGINE V12
+# XAU / BTC / XAG SCALP EXECUTION ENGINE V12.4
 
-Decision Engine Rebuild.
+Breaking Tape + Fast Impulse Sniper + Supabase Lab.
 
-Key changes:
-- BTC sources are separated strictly:
-  - BTCUSD = MetaAPI broker price/candles only. No Binance data is mixed.
-  - BTCUSDT = Binance Spot price/klines/depth/aggTrades only.
-  - XAUUSD/XAGUSD = MetaAPI only with synthetic footprint from candles/tickVolume.
-- Binance APIs use fallback hosts: api.binance.com, api1.binance.com, data-api.binance.vision.
-- Core decision is no longer equal voting from RSI/MACD/EMA/Gann.
-- Core decision priority:
-  1. Candle Behavior
-  2. Session/Level Liquidity
-  3. Smart Money Footprint
-  4. Opportunity/Breakout/No-Chase Hunter
-  5. Target Guard / Risk
-- RSI/MACD/EMA/Gann are supporting/context only and cannot create a trade alone.
-- Analysis panels now show detailed explanations, not just a number.
-- Opportunity Hunter detects:
-  - compression near level
-  - breakout/breakdown
-  - no-chase after extended candles
-  - liquidity triggers
-- No demo fallback.
+Added:
+- Breaking-news style ticker above the chart.
+- Priority order:
+  1. FAST / LOCKED TRADE
+  2. BREAKOUT ALERT
+  3. IMPULSE PRE-ALERT
+  4. LIQUIDITY SWEEP
+  5. TARGET GUARD
+  6. NO CHASE
+  7. WATCH / commentary
+- Fast Sniper real trade mode:
+  - BTCUSDT Binance only
+  - Aggressive Mode only
+  - M1 / M5 only
+  - Requires IMPULSE_ALERT or BREAKOUT
+  - Requires Binance Footprint alignment
+  - Blocks if No Chase / candle already too stretched
+  - Small SL behind micro-structure
+  - TP1 before nearest obstacle when possible
+  - Auto locks and auto saves to Supabase/local journal
+- Keeps strict routing:
+  - BTCUSDT => Binance only
+  - BTCUSD => MetaAPI only
+  - XAUUSD/XAGUSD => MetaAPI only
+- Supabase Auto Journal + Backtest Lab retained from V12.3.
 
-Required Vercel environment variables for MetaAPI routes:
+Required Vercel env:
+SUPABASE_URL
+SUPABASE_SERVICE_ROLE_KEY
+JOURNAL_WORKER_SECRET
 METAAPI_TOKEN
 METAAPI_ACCOUNT_ID
 METAAPI_REGION=london
-
-Binance routes need no API key.
