@@ -1,10 +1,11 @@
-# V12.4.6 Light Load Debug
+# V12.4.1 Magic Patch Binding Fix
 
-This version is made to stop NO DATA loops:
-- price is fetched first
-- initial candles request is only 60 candles
-- fallback tries 120/60/30/10
-- error screen shows exact API test URL
-- fixes mode selector binding
+Base: V12.4.1 Hobby Safe + requested Magic Patch.
 
-Upload full ZIP and open with ?v=1246
+This patch changes only runtime binding:
+- Keeps all professional UI buttons and panels.
+- Hydrates HTML element globals for Safari/iPhone.
+- Binds M1/M5/M15, asset switch, and mode switch safely after DOMContentLoaded.
+- Keeps Magic Button, Breaking Tape, Backtest Integrity, Supabase APIs.
+
+Open after deploy: ?v=1241magicfix
