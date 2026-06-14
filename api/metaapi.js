@@ -8,18 +8,19 @@ module.exports=async function(req,res){try{
  if(!token||!accountId)return res.status(500).json({ok:false,error:'Missing METAAPI_TOKEN or METAAPI_ACCOUNT_ID'});
  const symbol=String(req.query.symbol||'XAUUSD').trim(),region=process.env.METAAPI_REGION||'london';
  const host=process.env.METAAPI_CLIENT_HOST||`https://mt-client-api-v1.${region}.agiliumtrade.ai`;
+ const marketDataHost=process.env.METAAPI_MARKET_DATA_HOST||`https://mt-market-data-client-api-v1.${region}.agiliumtrade.ai`;
  const wantCandles=!!(req.query.timeframe||req.query.limit||req.query.kind==='candles'||req.query.type==='candles');
  if(wantCandles){
    const tf=normTf(req.query.timeframe||'5m'),limit=Math.max(1,Math.min(parseInt(req.query.limit||'700',10),1000));
-   let url=`${host}/users/current/accounts/${encodeURIComponent(accountId)}/historical-market-data/symbols/${encodeURIComponent(symbol)}/timeframes/${encodeURIComponent(tf)}/candles?limit=${limit}`;
+   let url=`${marketDataHost}/users/current/accounts/${encodeURIComponent(accountId)}/historical-market-data/symbols/${encodeURIComponent(symbol)}/timeframes/${encodeURIComponent(tf)}/candles?limit=${limit}`;
    if(req.query.startTime)url+=`&startTime=${encodeURIComponent(req.query.startTime)}`;
    let status=0,detail='',attempts=0;
    for(let i=0;i<4;i++){attempts=i+1;let up;try{up=await ft(url,{headers:{Accept:'application/json','auth-token':token}},10000)}catch(e){status=504;detail=e.message;if(i<3)await sleep(500*Math.pow(1.7,i));continue}
     status=up.status;const text=await up.text();let data;try{data=JSON.parse(text)}catch{data=text}
-    if(up.ok){res.setHeader('Cache-Control','no-store,max-age=0');return res.status(200).json({ok:true,source:'metaapi',symbol,timeframe:tf,attempts,candles:data})}
+    if(up.ok){res.setHeader('Cache-Control','no-store,max-age=0');return res.status(200).json({ok:true,source:'metaapi-historical-candles',host:marketDataHost,symbol,timeframe:tf,attempts,candles:data})}
     detail=clean(data); if(![429,500,502,503,504].includes(status)||i===3)break; await sleep(500*Math.pow(1.7,i));
    }
-   return res.status(status||500).json({ok:false,error:'MetaAPI candles failed',status,attempts,detail,hint: status===404?'Check historical-market-data endpoint, account deployment, symbol name, and timeframe permissions':'Check MetaAPI account connection and market data access'});
+   return res.status(status||500).json({ok:false,error:'MetaAPI candles failed',status,attempts,detail,hint: status===404?'Historical candles use a separate host: mt-market-data-client-api-v1.<region>.agiliumtrade.ai. If this still fails, verify account is deployed, symbol exists exactly as broker uses it, and try METAAPI_MARKET_DATA_HOST override from MetaApi API access page.':'Check MetaAPI account connection and market data access'});
  }
  const url=`${host}/users/current/accounts/${encodeURIComponent(accountId)}/symbols/${encodeURIComponent(symbol)}/current-price?keepSubscription=true`;
  let status=0,detail='',attempts=0;
