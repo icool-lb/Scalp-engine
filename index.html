@@ -380,16 +380,16 @@ async function apiGet(path){
   return j;
 }
 async function remoteJournalCreate(t,rec){
-  try{return await apiPost('/api/journal?action=create',{trade:t,record:rec,version:'V12.4.1_MAGIC'})}
+  try{return await apiPost('/api/journal?action=create',{trade:t,record:rec,version:'V12.4.1_MAGIC_FIX3'})}
   catch(e){console.warn('Supabase create skipped:',e.message);return{ok:false,localOnly:true,error:e.message}}
 }
 async function remoteJournalUpdate(t,rec,status='',price=null,resultAnalysis=null){
-  try{return await apiPost('/api/journal?action=update',{client_trade_id:String(t?.createdAt||rec?.id),trade:t,record:rec,status,price,resultAnalysis,version:'V12.4.1_MAGIC'})}
+  try{return await apiPost('/api/journal?action=update',{client_trade_id:String(t?.createdAt||rec?.id),trade:t,record:rec,status,price,resultAnalysis,version:'V12.4.1_MAGIC_FIX3'})}
   catch(e){console.warn('Supabase update skipped:',e.message);return{ok:false,localOnly:true,error:e.message}}
 }
 async function saveBacktestToSupabase(summary,trades,cs){
   if(!trades?.length)return 'Supabase Backtest: no trades to save';
-  const payload={version:'V12.4.1_MAGIC',summary:{...summary,source:getDataRoute(symbol).source,from:btFrom?.value||'',to:btTo?.value||'',settings:{mode,tf,symbol}},trades};
+  const payload={version:'V12.4.1_MAGIC_FIX3',summary:{...summary,source:getDataRoute(symbol).source,from:btFrom?.value||'',to:btTo?.value||'',settings:{mode,tf,symbol}},trades};
   try{const r=await apiPost('/api/journal?action=backtest',payload);return `Supabase Backtest saved: ${r.run_id||''}`}
   catch(e){return `Supabase Backtest skipped: ${e.message}`}
 }
@@ -510,19 +510,27 @@ function clearJournal(){if(confirm('حذف كل الجورنال؟')){localStora
 function saveActiveTrade(){if(activeTrade)localStorage.scalp_active_trade=JSON.stringify(activeTrade);else localStorage.removeItem('scalp_active_trade')}
 function closeActiveTrade(status,price){
   const closedTrade=activeTrade;
-  if(closedTrade){
-    closedTrade.status=status;closedTrade.exit=price;closedTrade.closedAt=Date.now();
-    const resultAnalysis=finalizeJournalTrade(closedTrade,status,price);
-    closedTrade.resultAnalysis=resultAnalysis;
-    const hist=JSON.parse(localStorage.scalp_closed_trades||'[]');
-    hist.push(closedTrade);
-    localStorage.scalp_closed_trades=JSON.stringify(hist.slice(-300));
-    let all=JSON.parse(localStorage.scalp_all_suggestions||'[]');let rec=all.find(x=>x.id===closedTrade.createdAt);
-    if(rec){Object.assign(rec,resultAnalysis,{status,exit:price,closedAt:new Date().toISOString()});localStorage.scalp_all_suggestions=JSON.stringify(all.slice(-700));}
+  try{
+    if(closedTrade){
+      closedTrade.status=status;closedTrade.exit=price;closedTrade.closedAt=Date.now();
+      let resultAnalysis={result:status==='SL HIT'?'LOSS':'WIN',resultCause:status,closedAt:new Date().toISOString()};
+      try{resultAnalysis=finalizeJournalTrade(closedTrade,status,price)||resultAnalysis}catch(e){console.warn('finalizeJournalTrade skipped:',e.message)}
+      closedTrade.resultAnalysis=resultAnalysis;
+      try{
+        const hist=safeJson('scalp_closed_trades',[]);
+        hist.push(closedTrade);
+        localStorage.scalp_closed_trades=JSON.stringify(hist.slice(-300));
+      }catch(e){console.warn('closed history skipped:',e.message)}
+      try{
+        let all=safeJson('scalp_all_suggestions',[]);let rec=all.find(x=>x.id===closedTrade.createdAt);
+        if(rec){Object.assign(rec,resultAnalysis,{status,exit:price,closedAt:new Date().toISOString(),result:status==='SL HIT'?'LOSS':'WIN'});localStorage.scalp_all_suggestions=JSON.stringify(all.slice(-700));}
+      }catch(e){console.warn('all suggestions close skipped:',e.message)}
+    }
+  }finally{
+    activeTrade=null;saveActiveTrade();
+    signalCooldownUntil=Date.now()+cfg(closedTrade?.mode||mode).cooldown*1000;
+    localStorage.scalp_cooldown_until=String(signalCooldownUntil);
   }
-  activeTrade=null;saveActiveTrade();
-  signalCooldownUntil=Date.now()+cfg(closedTrade?.mode||mode).cooldown*1000;
-  localStorage.scalp_cooldown_until=String(signalCooldownUntil);
 }
 function evalTradeStatus(t,p){
   if(!t||!Number.isFinite(p))return 'WAIT';
@@ -684,7 +692,7 @@ function lockSignal(fresh){
   if(activeTrade && activeTrade.symbol===symbol){
     const st=evalTradeStatus(activeTrade,p);
     activeTrade.lastStatus=st;activeTrade.lastPrice=p;updateJournalDuring(activeTrade,p,st);saveActiveTrade();
-    if(st==='SL HIT'||st===(activeTrade.releaseAt||cfg(activeTrade.mode||mode).release)+' HIT'){closeActiveTrade(st,p);return applyThresholdGate(fresh)}
+    if(shouldReleaseTrade(activeTrade,st)){closeActiveTrade(st,p);return closedCooldownSignal(fresh,st)}
     return {...fresh,dir:activeTrade.dir,q:activeTrade.q,grade:activeTrade.grade,entry:activeTrade.entry,sl:activeTrade.sl,tp1:activeTrade.tp1,tp2:activeTrade.tp2,tp3:activeTrade.tp3,reason:'🔒 صفقة مقفلة قيد المتابعة: لا يتم إصدار صفقة جديدة حتى TP3 أو SL. السبب الأصلي: '+(activeTrade.reason||''),locked:true,lockStatus:st,targetGuard:activeTrade.targetGuard||fresh.targetGuard,htfBias:activeTrade.htfBias||fresh.htfBias,gann:activeTrade.gann||fresh.gann,technical:activeTrade.technical||fresh.technical,sessionLiquidity:activeTrade.sessionLiquidity||fresh.sessionLiquidity,footprint:activeTrade.footprint||fresh.footprint,opportunity:activeTrade.opportunity||fresh.opportunity,cb:{...fresh.cb,dir:activeTrade.dir,score:activeTrade.q,reason:activeTrade.candle||fresh.cb.reason}};
   }
   if(Date.now()<signalCooldownUntil){
@@ -860,7 +868,7 @@ function hybridPanelHtml(s){
 }
 
 function panels(){let s=sig;if(!s)return;$('grade').textContent=s.grade;$('htf').textContent=s.htfBias;$('trigger').textContent=s.locked?('LOCKED '+(s.lockStatus||'')):(s.watch?(s.watchLevel+' '+s.watchDir):s.cb.reason);$('quality').textContent=s.q+'%';$('decision').textContent=s.locked?('🔒 '+s.dir):(s.watch?(s.watchLevel+' '+s.watchDir):(s.suppressed?'NO TRADE':(s.decisionCore?.label||s.dir)));$('decision').style.color=s.dir==='BUY'?'var(--g)':s.dir==='SELL'?'var(--r)':'var(--y)';$('side').textContent=s.locked?('🔒 '+s.dir):(s.watch?(s.watchLevel+' '+s.watchDir):(s.suppressed?'NO TRADE':(s.decisionCore?.label||s.dir)));['entry','sl','tp1','tp2','tp3','be'].forEach(id=>$(id).textContent=s[id]?fmt(s[id],2):'---');$('be').textContent=s.entry&&s.dir!=='RANGE'?fmt(s.entry,2):'---';$('risk').textContent=s.sl?fmt(Math.abs(s.entry-s.sl),2):'---';$('rr').textContent=s.tp2?fmt(Math.abs(s.tp2-s.entry)/Math.abs(s.entry-s.sl),2):'---';$('inv').textContent=s.sl?fmt(s.sl,2):'---';$('modeRule').textContent=cfg().name+' trade ≥ '+cfg().trade+'%';$('lockRule').textContent='Release: '+cfg().release;$('dataRoute').textContent=getDataRoute(symbol).source;renderBreakingTape(s);$('hybridPanels').innerHTML=hybridPanelHtml(s);$('alertBox').innerHTML='<div class="sourceNote">🔌 '+routeLabel(symbol)+'</div>'+(s.decisionCore?.label==='NO CHASE'?'<div class="noChaseNote">🚫 NO CHASE: لا نطارد شمعة طويلة. ننتظر Retest/إغلاق تأكيد.</div>':'')+(s.locked?'<div class="lockedNote">🔒 الصفقة مقفلة — لا توجد إشارة جديدة حتى TP3 أو SL<br>الحالة: '+(s.lockStatus||'ACTIVE')+'<br>Entry/SL/TP ثابتة ولا تتغير مع السعر<br>📄 تقرير الدخول جاهز من زر تقرير الدخول</div>':'') + (s.gann?'<div class="gannNote">📐 '+s.gann.reason+'<br>Anchor: '+s.gann.anchorType+' '+fmt(s.gann.anchorPrice,2)+' | Nearest: '+s.gann.nearest.label+' '+fmt(s.gann.nearest.current,2)+'</div>':'') + (s.footprint?'<div class="footprintNote">👣 '+s.footprint.reason+'</div>':'') + (s.opportunity?'<div class="opportunityNote">🎯 '+s.opportunity.reason+'</div>':'') + s.reason;$('candleBox').innerHTML=s.cb.list.slice(-6).map(x=>`<div class=school><span class=n>${x.name}<small style=display:block>${x.why}</small></span><span class="tag ${x.dir==='BUY'?'buy':x.dir==='SELL'?'sell':'range'}">${x.dir} ${x.pts}</span></div>`).join('')||'لا نمط واضح';$('schools').innerHTML=s.schools.map(x=>`<div class=school><span class=n>${x.n}</span><span class="tag ${x.d==='BUY'?'buy':x.d==='SELL'?'sell':'range'}">${x.d} ${x.s}</span></div>`).join('');let ov=$('ov');ov.querySelector('.sig').className='sig '+(s.dir==='BUY'?'buy':s.dir==='SELL'?'sell':'range');ov.querySelector('.sig').textContent=s.locked?('🔒 '+s.dir+' '+s.q+'%'):(s.watch?(s.watchLevel+' '+s.watchDir+' '+s.q+'%'):(s.suppressed?('NO TRADE '+s.q+'%'):(s.dir+' '+s.q+'%')));ov.querySelector('.why').textContent=s.reason;track()}
-function track(){if(!sig||!quote||sig.dir==='RANGE'){tstat.textContent=sig?.cooldown?'COOLDOWN':(sig?.watch?'WATCH':(sig?.suppressed?'NO TRADE':'WAIT'));pl.textContent='---';return}let p=quote.mid,st=activeTrade?evalTradeStatus(activeTrade,p):'ACTIVE';if(sig.dir==='BUY'){if(p>=sig.tp3)st='TP3 HIT';else if(p>=sig.tp2)st='TP2 HIT';else if(p>=sig.tp1)st='TP1 HIT → BE';else if(p<=sig.sl)st='SL HIT'}else{if(p<=sig.tp3)st='TP3 HIT';else if(p<=sig.tp2)st='TP2 HIT';else if(p<=sig.tp1)st='TP1 HIT → BE';else if(p>=sig.sl)st='SL HIT'}if(activeTrade){activeTrade.lastStatus=st;activeTrade.lastPrice=p;updateJournalDuring(activeTrade,p,st);saveActiveTrade();if(st==='SL HIT'||st===(activeTrade.releaseAt||cfg(activeTrade.mode||mode).release)+' HIT'){closeActiveTrade(st,p)}}
+function track(){if(!sig||!quote||sig.dir==='RANGE'){tstat.textContent=sig?.cooldown?'COOLDOWN':(sig?.watch?'WATCH':(sig?.suppressed?'NO TRADE':'WAIT'));pl.textContent='---';return}let p=quote.mid,st=activeTrade?evalTradeStatus(activeTrade,p):'ACTIVE';if(sig.dir==='BUY'){if(p>=sig.tp3)st='TP3 HIT';else if(p>=sig.tp2)st='TP2 HIT';else if(p>=sig.tp1)st='TP1 HIT → BE';else if(p<=sig.sl)st='SL HIT'}else{if(p<=sig.tp3)st='TP3 HIT';else if(p<=sig.tp2)st='TP2 HIT';else if(p<=sig.tp1)st='TP1 HIT → BE';else if(p>=sig.sl)st='SL HIT'}if(activeTrade){activeTrade.lastStatus=st;activeTrade.lastPrice=p;updateJournalDuring(activeTrade,p,st);saveActiveTrade();if(shouldReleaseTrade(activeTrade,st)){closeActiveTrade(st,p);sig={...sig,locked:false,closed:true,reason:'✅ تم إغلاق الصفقة آليًا عند '+st}}}
 tstat.textContent=st;let x=sig.dir==='BUY'?p-sig.entry:sig.entry-p;pl.textContent=fmt(x,2);follow.innerHTML=`<div class=line><span>Price</span><b>${fmt(p,2)}</b></div><div class=line><span>To TP1</span><b>${fmt(Math.abs(sig.tp1-p),2)}</b></div><div class=line><span>To SL</span><b>${fmt(Math.abs(p-sig.sl),2)}</b></div><div class=line><span>Status</span><b>${st}</b></div><div class=line><span>Mode</span><b>${cfg(activeTrade?.mode||mode).name}</b></div><div class=line><span>Release</span><b>${activeTrade?.releaseAt||cfg().release}</b></div><div class=line><span>Footprint</span><b>${sig.footprint?.dir||'---'} ${sig.footprint?.score||''}</b></div><div class=line><span>Opportunity</span><b>${sig.opportunity?.dir||'---'} ${sig.opportunity?.score||''}</b></div>${reversalAtObstacle(activeTrade,p)?'<div class=targetGuard>'+reversalAtObstacle(activeTrade,p)+'</div>':''}`}
 
 function liveCandles(){
