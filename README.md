@@ -1,37 +1,33 @@
-# XAU / BTC / XAG SCALP EXECUTION ENGINE V12.4
+# XAU / BTC / XAG SCALP EXECUTION ENGINE V12.4.1 — Hobby Safe
 
-Breaking Tape + Fast Impulse Sniper + Supabase Lab.
+This version fixes Vercel Hobby deployment limit.
 
-Added:
-- Breaking-news style ticker above the chart.
-- Priority order:
-  1. FAST / LOCKED TRADE
-  2. BREAKOUT ALERT
-  3. IMPULSE PRE-ALERT
-  4. LIQUIDITY SWEEP
-  5. TARGET GUARD
-  6. NO CHASE
-  7. WATCH / commentary
-- Fast Sniper real trade mode:
-  - BTCUSDT Binance only
-  - Aggressive Mode only
-  - M1 / M5 only
-  - Requires IMPULSE_ALERT or BREAKOUT
-  - Requires Binance Footprint alignment
-  - Blocks if No Chase / candle already too stretched
-  - Small SL behind micro-structure
-  - TP1 before nearest obstacle when possible
-  - Auto locks and auto saves to Supabase/local journal
-- Keeps strict routing:
-  - BTCUSDT => Binance only
-  - BTCUSD => MetaAPI only
-  - XAUUSD/XAGUSD => MetaAPI only
-- Supabase Auto Journal + Backtest Lab retained from V12.3.
+Vercel Hobby error reason:
+Previous build had more than 12 files inside /api, so Vercel counted them as Serverless Functions.
 
-Required Vercel env:
-SUPABASE_URL
-SUPABASE_SERVICE_ROLE_KEY
-JOURNAL_WORKER_SECRET
-METAAPI_TOKEN
-METAAPI_ACCOUNT_ID
-METAAPI_REGION=london
+Now /api contains only 4 functions:
+- metaapi.js
+- binance.js
+- journal.js
+- worker-track-trades.js
+
+Everything remains:
+- Breaking ticker
+- Fast Impulse Sniper
+- Supabase Auto Journal
+- Backtest Lab
+- Worker tracking
+- Strict routing:
+  - BTCUSDT = Binance only
+  - BTCUSD = MetaAPI only
+  - XAUUSD/XAGUSD = MetaAPI only
+
+Upload full ZIP contents to GitHub, then Redeploy Vercel.
+Open with ?v=1241 to avoid iPhone/Safari cache.
+
+Test endpoints:
+- /api/metaapi?symbol=XAUUSD
+- /api/metaapi?symbol=XAUUSD&timeframe=5m&limit=10
+- /api/binance?type=price&symbol=BTCUSDT
+- /api/binance?type=klines&symbol=BTCUSDT&timeframe=5m&limit=10
+- /api/journal?action=open
