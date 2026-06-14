@@ -1,26 +1,24 @@
-# XAU / BTC / XAG SCALP EXECUTION ENGINE V12.4.2 — Magic + Integrity
+# XAU / BTC / XAG SCALP EXECUTION ENGINE V12.4.3
 
-New:
-- Stable Breaking Tape: moving ticker no longer restarts every refresh and no flickering color.
-- Magic Button / الزر السحري:
-  - Detects range or trend.
-  - Calculates range high/low, duration, touches, price location.
-  - Reads candle behavior, liquidity, footprint, HTF, target guard.
-  - Gives next direction probability, target, invalidation, time horizon.
-  - Warns about manipulation: sweeps, long wicks, footprint/candle conflict, false breakout risk.
-  - Draws Magic support/resistance/target/invalidation on chart.
-- Backtest Integrity Fix:
-  - Target Guard hard block.
-  - XAU/XAG liquidity sweep = watch only unless retest/confirmation.
-  - No overlapping trades.
-  - HTF aggregation for backtest.
-  - Estimated cost/slippage.
-  - Better loss-cause report.
+MetaAPI candles route fix.
 
-Hobby Safe API retained:
-- /api/metaapi
-- /api/binance
-- /api/journal
-- /api/worker-track-trades
+Issue fixed:
+- Current price endpoint was working.
+- Candles endpoint returned 404 NotFound because the path used:
+  /symbols/{symbol}/timeframes/{tf}/candles
+- Corrected candles path to:
+  /historical-market-data/symbols/{symbol}/timeframes/{tf}/candles
 
-Open with ?v=1242 after deploy.
+Everything else remains from V12.4.2:
+- Stable breaking tape
+- Magic button
+- Backtest integrity fixes
+- Hobby Safe API
+- Supabase Journal / Worker
+
+After deployment test:
+- /api/metaapi?symbol=XAUUSD
+- /api/metaapi?symbol=XAUUSD&timeframe=5m&limit=10
+
+Open app with:
+?v=1243
