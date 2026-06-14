@@ -1,1 +1,0 @@
-module.exports=async(req,res)=>res.status(200).json({ok:false,news:[],message:'NEWS OFF'});
