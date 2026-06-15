@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/><title>XAU/BTC/XAG Scalp Engine V12.4.1 MAGIC FIX 2</title><link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;800;900&family=JetBrains+Mono:wght@700;900&display=swap" rel="stylesheet"><style>
+<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/><title>XAU/BTC/XAG Scalp Engine V12.4.1 MAGIC FIX5 FIX 2</title><link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;800;900&family=JetBrains+Mono:wght@700;900&display=swap" rel="stylesheet"><style>
 :root{--bg:#eef2f7;--p:#f8fafc;--w:#fff;--ink:#0f172a;--m:#64748b;--ln:#cbd5e1;--g:#16a34a;--r:#dc2626;--y:#f59e0b;--b:#2563eb;--c:#0891b2;--v:#7c3aed;--sh:0 10px 30px rgba(15,23,42,.12)}*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:Cairo,sans-serif;color:var(--ink);overflow:hidden}button,input,select{font-family:inherit}.app{height:100vh;display:grid;grid-template-rows:auto 1fr}.top{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;background:#f8fafc;border-bottom:1px solid var(--ln);box-shadow:var(--sh);padding:10px 14px;z-index:2}.brand{direction:ltr;display:flex;gap:10px;align-items:center}.logo{width:46px;height:46px;border-radius:15px;display:grid;place-items:center;background:linear-gradient(135deg,#fff7ed,#facc15);font-size:25px;font-weight:900;color:#92400e;border:1px solid #fde68a}.brand h1{margin:0;font-size:17px;font-weight:900;line-height:1.05}.brand p{margin:4px 0 0;color:var(--m);font-size:11px}.px{text-align:center}.big{font:900 38px "JetBrains Mono";letter-spacing:1px}.ba{font:800 12px "JetBrains Mono"}.bid{color:var(--g)}.ask{color:var(--r)}.spr{color:var(--m)}.ctrl{display:flex;gap:7px;align-items:center;justify-content:flex-start;flex-wrap:wrap}.status{height:36px;border:1px solid var(--ln);border-radius:18px;background:#fff;padding:0 12px;display:flex;align-items:center;gap:8px;font-weight:900;font-size:12px;direction:ltr}.dot{width:10px;height:10px;border-radius:50%;background:var(--m)}.live .dot{background:var(--g);box-shadow:0 0 12px var(--g)}.warn .dot{background:var(--y);box-shadow:0 0 12px var(--y)}.err .dot{background:var(--r);box-shadow:0 0 12px var(--r)}select,.btn,.tool,.tf{height:38px;border:1px solid var(--ln);background:#fff;border-radius:15px;padding:0 11px;font-weight:900;color:var(--ink)}.tf.active,.btn.gold,.tool.on{background:#f8c65a;border-color:#f59e0b}.grid{height:100%;display:grid;grid-template-columns:300px minmax(430px,1fr) 320px;gap:10px;padding:10px;overflow:hidden}.panel{background:var(--p);border:1px solid var(--ln);border-radius:18px;box-shadow:var(--sh);overflow:auto}.side{padding:12px}.card{background:#fff;border:1px solid var(--ln);border-radius:16px;padding:12px;margin-bottom:10px}.card h2,.card h3{font-size:14px;margin:0 0 8px;font-weight:900}.score{display:grid;grid-template-columns:1fr 1fr;gap:8px}.metric{background:#f1f5f9;border:1px solid var(--ln);border-radius:14px;padding:8px}.metric b{display:block;font:900 18px "JetBrains Mono"}.metric span{font-size:11px;color:var(--m)}.line,.school{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0;border-bottom:1px dashed var(--ln)}.line span,.school .n{color:var(--m)}.tag{min-width:76px;padding:5px 8px;border-radius:999px;font:900 11px "JetBrains Mono";text-align:center}.buy{background:#dcfce7;color:#166534}.sell{background:#fee2e2;color:#991b1b}.range{background:#fef3c7;color:#92400e}.decision{font:900 44px "JetBrains Mono";color:var(--y)}.alert{border:1px solid #f59e0b;background:#fffbeb;border-radius:14px;padding:10px;font-weight:800;font-size:13px}.chartPanel{display:grid;grid-template-rows:auto auto 1fr 132px;background:#f8fafc;overflow:hidden;position:relative}.toolbar{display:flex;gap:7px;align-items:center;flex-wrap:wrap;padding:8px;border-bottom:1px solid var(--ln);background:#eef2f7;direction:ltr}.tool{height:34px;background:#dbeafe;border-color:#bfdbfe}.tool.warn{background:#fef3c7;border-color:#f59e0b}.wrap{position:relative;overflow:hidden}.overlay{position:absolute;top:12px;left:12px;min-width:250px;background:rgba(255,255,255,.94);border:1px solid #94a3b8;border-radius:14px;padding:9px 12px;box-shadow:var(--sh);direction:ltr}.overlay .sig{font:900 17px "JetBrains Mono"}.overlay .why{font-size:12px;color:#334155;margin-top:4px;direction:rtl;text-align:right}.nodata{position:absolute;inset:60px 20px 20px;display:none;align-items:center;justify-content:center;text-align:center;background:rgba(248,250,252,.92);border:1px solid #fca5a5;border-radius:18px;color:#991b1b;font-weight:900;z-index:4}.nodata.show{display:flex}.bottom{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--ln);background:#eef2f7}.bottom canvas{border-inline-start:1px solid var(--ln)}canvas{display:block;width:100%;height:100%}.modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(15,23,42,.35);z-index:9;padding:16px}.modal.open{display:flex}.box{width:min(960px,96vw);max-height:92vh;overflow:auto;background:#f8fafc;border:1px solid #94a3b8;border-radius:22px;box-shadow:var(--sh);padding:18px}.mh{display:flex;align-items:center;justify-content:space-between}.input{height:40px;border:1px solid var(--ln);border-radius:14px;background:#fff;padding:0 10px;font-weight:800;max-width:260px}.btrow{direction:ltr;display:flex;gap:8px;flex-wrap:wrap;align-items:end}.btf{display:flex;flex-direction:column;gap:4px}.btf label{font-size:10px;color:var(--m);font-weight:900;direction:ltr}pre{white-space:pre-wrap;background:#fff;border:1px solid #94a3b8;border-radius:15px;padding:12px;color:#0f172a;font:800 12px "JetBrains Mono";direction:ltr;text-align:left;min-height:180px}.livePulse{animation:pulse .6s}@keyframes pulse{0%{transform:scale(1.03)}100%{transform:scale(1)}}@media(max-width:1050px){body{overflow:auto}.app{height:auto;display:block}.top{display:flex;flex-direction:column}.brand h1{font-size:14px}.big{font-size:31px}.grid{display:flex;flex-direction:column;height:auto;overflow:visible;padding:6px}.chartPanel{height:730px;min-height:730px;order:1}.panel{overflow:visible}.side:first-child{order:2}.side:last-child{order:3}.toolbar{overflow:auto;flex-wrap:nowrap}.tool{flex:0 0 auto}}
 
 /* V11.1 fixes */
@@ -47,7 +47,7 @@
 @keyframes breakingMarquee{0%{transform:translateX(-10%)}100%{transform:translateX(100%)}}
 .fastNote{border:2px solid #dc2626;background:#fff1f2;color:#7f1d1d;border-radius:12px;padding:8px;margin-top:8px;font-weight:900}
 
-/* V12.4.1 MAGIC FIX 2 - stable urgent tape, no flicker */
+/* V12.4.1 MAGIC FIX5 FIX 2 - stable urgent tape, no flicker */
 .ticker{
   direction:ltr!important;
   height:34px!important;
@@ -556,6 +556,29 @@ function evalTradeStatus(t,p){
   }
   return 'ACTIVE';
 }
+function hitRank(st){
+  st=String(st||'').toUpperCase();
+  if(st.includes('SL HIT'))return -1;
+  if(st.includes('TP3'))return 3;
+  if(st.includes('TP2'))return 2;
+  if(st.includes('TP1'))return 1;
+  return 0;
+}
+function releaseRank(releaseAt){
+  releaseAt=String(releaseAt||'TP3').toUpperCase();
+  if(releaseAt.includes('TP1'))return 1;
+  if(releaseAt.includes('TP2'))return 2;
+  if(releaseAt.includes('TP3'))return 3;
+  return 3;
+}
+function shouldReleaseTrade(t,status){
+  if(!t)return false;
+  const st=String(status||'');
+  if(st.includes('SL HIT'))return true;
+  const got=hitRank(st);
+  const need=releaseRank(t.releaseAt||cfg(t.mode||mode).release);
+  return got>0 && got>=need;
+}
 
 function levelList(a){return (a||[]).slice(0,4).map(x=>fmt(x.price||x,2)).join(' | ')||'---'}
 function boxList(a){return (a||[]).slice(-4).map(x=>`${x.type} ${fmt(x.lo,2)}-${fmt(x.hi,2)}`).join(' | ')||'---'}
@@ -875,32 +898,6 @@ function hybridPanelHtml(s){
     block('Technical Indicators',s.technical?.leader,'',s.technical?.text,['RSI/MACD/EMA/Gann are supporting/context only — not direct trade triggers.'])
   ].join('');
 }
-
-
-function updateTopSignal(s){
-  const el=$('topSignal');
-  if(!el||!s)return;
-  const cls=s.dir==='BUY'?'buy':s.dir==='SELL'?'sell':'range';
-  el.className='topSignal '+cls;
-  el.textContent=s.locked?('🔒 '+s.dir+' '+s.q+'%'):(s.watch?(s.watchLevel+' '+s.watchDir+' '+s.q+'%'):(s.suppressed?('NO TRADE '+s.q+'%'):(s.dir+' '+s.q+'%')));
-  el.title=s.reason||'';
-}
-function enterFullChart(){
-  const p=document.querySelector('.chartPanel');
-  if(!p)return;
-  p.classList.add('fullChart');
-  document.body.style.overflow='hidden';
-  setTimeout(()=>{try{drawAll()}catch(e){}},120);
-}
-function exitFullChart(){
-  const p=document.querySelector('.chartPanel');
-  if(!p)return;
-  p.classList.remove('fullChart');
-  document.body.style.overflow='';
-  setTimeout(()=>{try{drawAll()}catch(e){}},120);
-}
-window.enterFullChart=enterFullChart;
-window.exitFullChart=exitFullChart;
 
 function panels(){let s=sig;if(!s)return;$('grade').textContent=s.grade;$('htf').textContent=s.htfBias;$('trigger').textContent=s.locked?('LOCKED '+(s.lockStatus||'')):(s.watch?(s.watchLevel+' '+s.watchDir):s.cb.reason);$('quality').textContent=s.q+'%';$('decision').textContent=s.locked?('🔒 '+s.dir):(s.watch?(s.watchLevel+' '+s.watchDir):(s.suppressed?'NO TRADE':(s.decisionCore?.label||s.dir)));$('decision').style.color=s.dir==='BUY'?'var(--g)':s.dir==='SELL'?'var(--r)':'var(--y)';$('side').textContent=s.locked?('🔒 '+s.dir):(s.watch?(s.watchLevel+' '+s.watchDir):(s.suppressed?'NO TRADE':(s.decisionCore?.label||s.dir)));['entry','sl','tp1','tp2','tp3','be'].forEach(id=>$(id).textContent=s[id]?fmt(s[id],2):'---');$('be').textContent=s.entry&&s.dir!=='RANGE'?fmt(s.entry,2):'---';$('risk').textContent=s.sl?fmt(Math.abs(s.entry-s.sl),2):'---';$('rr').textContent=s.tp2?fmt(Math.abs(s.tp2-s.entry)/Math.abs(s.entry-s.sl),2):'---';$('inv').textContent=s.sl?fmt(s.sl,2):'---';$('modeRule').textContent=cfg().name+' trade ≥ '+cfg().trade+'%';$('lockRule').textContent='Release: '+cfg().release;$('dataRoute').textContent=getDataRoute(symbol).source;renderBreakingTape(s);$('hybridPanels').innerHTML=hybridPanelHtml(s);$('alertBox').innerHTML='<div class="sourceNote">🔌 '+routeLabel(symbol)+'</div>'+(s.decisionCore?.label==='NO CHASE'?'<div class="noChaseNote">🚫 NO CHASE: لا نطارد شمعة طويلة. ننتظر Retest/إغلاق تأكيد.</div>':'')+(s.locked?'<div class="lockedNote">🔒 الصفقة مقفلة — لا توجد إشارة جديدة حتى TP3 أو SL<br>الحالة: '+(s.lockStatus||'ACTIVE')+'<br>Entry/SL/TP ثابتة ولا تتغير مع السعر<br>📄 تقرير الدخول جاهز من زر تقرير الدخول</div>':'') + (s.gann?'<div class="gannNote">📐 '+s.gann.reason+'<br>Anchor: '+s.gann.anchorType+' '+fmt(s.gann.anchorPrice,2)+' | Nearest: '+s.gann.nearest.label+' '+fmt(s.gann.nearest.current,2)+'</div>':'') + (s.footprint?'<div class="footprintNote">👣 '+s.footprint.reason+'</div>':'') + (s.opportunity?'<div class="opportunityNote">🎯 '+s.opportunity.reason+'</div>':'') + s.reason;$('candleBox').innerHTML=s.cb.list.slice(-6).map(x=>`<div class=school><span class=n>${x.name}<small style=display:block>${x.why}</small></span><span class="tag ${x.dir==='BUY'?'buy':x.dir==='SELL'?'sell':'range'}">${x.dir} ${x.pts}</span></div>`).join('')||'لا نمط واضح';$('schools').innerHTML=s.schools.map(x=>`<div class=school><span class=n>${x.n}</span><span class="tag ${x.d==='BUY'?'buy':x.d==='SELL'?'sell':'range'}">${x.d} ${x.s}</span></div>`).join('');let ov=$('ov');ov.querySelector('.sig').className='sig '+(s.dir==='BUY'?'buy':s.dir==='SELL'?'sell':'range');ov.querySelector('.sig').textContent=s.locked?('🔒 '+s.dir+' '+s.q+'%'):(s.watch?(s.watchLevel+' '+s.watchDir+' '+s.q+'%'):(s.suppressed?('NO TRADE '+s.q+'%'):(s.dir+' '+s.q+'%')));ov.querySelector('.why').textContent=s.reason;updateTopSignal(s);track()}
 function track(){if(!sig||!quote||sig.dir==='RANGE'){tstat.textContent=sig?.cooldown?'COOLDOWN':(sig?.watch?'WATCH':(sig?.suppressed?'NO TRADE':'WAIT'));pl.textContent='---';return}let p=quote.mid,st=activeTrade?evalTradeStatus(activeTrade,p):'ACTIVE';if(sig.dir==='BUY'){if(p>=sig.tp3)st='TP3 HIT';else if(p>=sig.tp2)st='TP2 HIT';else if(p>=sig.tp1)st='TP1 HIT → BE';else if(p<=sig.sl)st='SL HIT'}else{if(p<=sig.tp3)st='TP3 HIT';else if(p<=sig.tp2)st='TP2 HIT';else if(p<=sig.tp1)st='TP1 HIT → BE';else if(p>=sig.sl)st='SL HIT'}if(activeTrade){activeTrade.lastStatus=st;activeTrade.lastPrice=p;updateJournalDuring(activeTrade,p,st);saveActiveTrade();if(shouldReleaseTrade(activeTrade,st)){closeActiveTrade(st,p);sig={...sig,locked:false,closed:true,reason:'✅ تم إغلاق الصفقة آليًا عند '+st}}}
@@ -1253,7 +1250,7 @@ Export Excel جاهز.`;
 function exportBT(){if(!lastBT.length)return alert('شغّل Backtest أولًا');let esc=s=>String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;'),html='<html><meta charset=utf-8><body><table border=1><tr>';['#','Symbol','TF','Mode','BT Target','Release','Time','Dir','Grade','Quality','Entry','SL','TP1','TP2','TP3','Result','Exit','Exit Time','MFE','MAE','Cost','Candle','Target Guard','Gann','Failure Cause','Reason'].forEach(h=>html+=`<th>${h}</th>`);html+='</tr>';lastBT.forEach((t,i)=>html+=`<tr><td>${i+1}</td><td>${esc(t.symbol)}</td><td>${esc(t.tf)}</td><td>${esc(t.mode)}</td><td>${esc(t.btWin)}</td><td>${esc(t.release)}</td><td>${esc(t.time)}</td><td>${t.dir}</td><td>${t.grade}</td><td>${t.q}</td><td>${t.entry}</td><td>${t.sl}</td><td>${t.tp1}</td><td>${t.tp2}</td><td>${t.tp3}</td><td>${t.res}</td><td>${t.exit}</td><td>${esc(t.etime)}</td><td>${t.mfe}</td><td>${t.mae}</td><td>${t.cost||''}</td><td>${esc(t.candle)}</td><td>${esc(t.targetGuard)}</td><td>${esc(t.gann)}</td><td>${esc(t.failure)}</td><td>${esc(t.reason)}</td></tr>`);html+='</table></body></html>';let b=new Blob([html],{type:'application/vnd.ms-excel;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`scalp_backtest_${symbol}.xls`;a.click()}
 function openBT(){let to=new Date(),fr=new Date(to-30*86400000);btTo.value=to.toISOString().slice(0,10);btFrom.value=fr.toISOString().slice(0,10);btModal.classList.add('open')}function closeBT(){btModal.classList.remove('open')}
 
-// === V12.4.1 MAGIC BINDING FIX ===
+// === V12.4.1 MAGIC FIX5 BINDING FIX ===
 // Keep the professional UI and all original onclick buttons. Hydrate element globals for Safari/iPhone.
 function hydrateDomGlobals(){
   const ids=['livePrice', 'bidLbl', 'askLbl', 'sprLbl', 'apiStatus', 'asset', 'mode', 'grade', 'htf', 'trigger', 'quality', 'side', 'entry', 'sl', 'tp1', 'tp2', 'tp3', 'be', 'tstat', 'pl', 'candleBox', 'alertBox', 'sound', 'newsTape', 'chart', 'ov', 'noData', 'noDataText', 'rsi', 'macd', 'decision', 'risk', 'rr', 'inv', 'modeRule', 'lockRule', 'dataRoute', 'schools', 'follow', 'saved', 'hybridPanels', 'candlesApi', 'priceApi', 'magicModal', 'magicReportBox', 'reportModal', 'entryReportBox', 'journalModal', 'journalReviewBox', 'btModal', 'btFrom', 'btTo', 'btTf', 'btFile', 'btResult'];
@@ -1329,5 +1326,5 @@ if(document.readyState==='loading'){
 }else{
   init();
 }
-// === END V12.4.1 MAGIC BINDING FIX ===
+// === END V12.4.1 MAGIC FIX5 BINDING FIX ===
 </script></body></html>
