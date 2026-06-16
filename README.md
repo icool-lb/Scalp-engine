@@ -1,11 +1,17 @@
-# V12.4.1 Magic Patch Binding Fix
+# V12.4.1 DNA + Supabase Backtest Fix12
 
-Base: V12.4.1 Hobby Safe + requested Magic Patch.
+Keeps the current professional interface and DNA/Wizard changes.
 
-This patch changes only runtime binding:
-- Keeps all professional UI buttons and panels.
-- Hydrates HTML element globals for Safari/iPhone.
-- Binds M1/M5/M15, asset switch, and mode switch safely after DOMContentLoaded.
-- Keeps Magic Button, Breaking Tape, Backtest Integrity, Supabase APIs.
+Changed:
+- Adjustable Backtest Pro parameters before testing.
+- Results now change when you adjust Min Quality, session, target, hold bars, overlap and costs.
+- Saves full backtest settings + trades + learning causes to Supabase.
+- Adds Supabase health + recommendations actions.
+- Adds strategy_rule_suggestions table.
 
-Open after deploy: ?v=1241magicfix
+Upload only these changed files if your APIs already work:
+- index.html
+- api/journal.js
+- supabase_schema.sql / supabase_schema_for_phone.txt
+
+Keep existing api/metaapi.js, api/binance.js, api/worker-track-trades.js.
