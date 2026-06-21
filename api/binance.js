@@ -1,86 +1,198 @@
-const spotHosts = ['https://api.binance.com', 'https://api1.binance.com', 'https://data-api.binance.vision'];
-const futuresHosts = ['https://fapi.binance.com', 'https://fapi1.binance.com'];
+// api/binance.js
+// FIX22 DIAGNOSTIC + REAL BINANCE SPOT/FUTURES SUPPORT
+// Version marker: BINANCE_API_FIX22_DIAGNOSTIC_2026_06_21
 
-function cleanSymbol(s) {
-  return String(s || 'BTCUSDT').toUpperCase().trim().replace('.P', '');
+const VERSION = 'BINANCE_API_FIX22_DIAGNOSTIC_2026_06_21';
+
+const spotHosts = [
+  'https://api.binance.com',
+  'https://api1.binance.com',
+  'https://data-api.binance.vision'
+];
+
+const futuresHosts = [
+  'https://fapi.binance.com',
+  'https://fapi1.binance.com'
+];
+
+function cleanSymbol(value) {
+  return String(value || 'BTCUSDT').toUpperCase().trim().replace('.P', '');
 }
+
 function preferFutures(symbol) {
-  // BTWUSDT in the Binance app is shown as Perp, so futures must be tried first.
+  // In Binance app, BTWUSDT is Perp, so futures must be tried first.
   return symbol === 'BTWUSDT';
 }
+
+function json(res, status, body) {
+  res.setHeader('Cache-Control', 'no-store,max-age=0');
+  return res.status(status).json({ version: VERSION, ...body });
+}
+
 async function httpJson(url) {
-  const r = await fetch(url, { headers: { Accept: 'application/json' }, cache: 'no-store' });
-  const txt = await r.text().catch(() => '');
-  let j = null;
-  try { j = txt ? JSON.parse(txt) : null; } catch (_) { j = null; }
+  const r = await fetch(url, {
+    headers: { Accept: 'application/json' },
+    cache: 'no-store'
+  });
+
+  const text = await r.text().catch(() => '');
+  let data = null;
+
+  try {
+    data = text ? JSON.parse(text) : null;
+  } catch (_) {
+    data = null;
+  }
 
   if (!r.ok) {
-    throw Object.assign(new Error(j?.msg || j?.message || txt || `HTTP ${r.status}`), {
+    throw Object.assign(new Error(data?.msg || data?.message || text || `HTTP ${r.status}`), {
       status: r.status,
-      detail: j || txt || null
+      detail: data || text || null,
+      url
     });
   }
-  if (j == null) {
-    throw Object.assign(new Error('Empty Binance response'), { detail: txt || null });
+
+  if (data === null || data === undefined) {
+    throw Object.assign(new Error('Empty Binance response'), {
+      detail: text || null,
+      url
+    });
   }
-  if (typeof j === 'object' && j.code && Number(j.code) < 0) {
-    throw Object.assign(new Error(j.msg || 'Binance API error'), { detail: j });
+
+  if (typeof data === 'object' && data.code && Number(data.code) < 0) {
+    throw Object.assign(new Error(data.msg || 'Binance API error'), {
+      status: 400,
+      detail: data,
+      url
+    });
   }
-  return j;
+
+  return data;
 }
+
 async function tryHosts(hosts, path, validator) {
   let last = null;
-  for (const h of hosts) {
+
+  for (const host of hosts) {
+    const url = host + path;
     try {
-      const data = await httpJson(h + path);
-      if (!validator || validator(data)) return { host: h, data };
-      last = { host: h, error: 'Unexpected response shape', data };
+      const data = await httpJson(url);
+      if (!validator || validator(data)) {
+        return { host, url, data };
+      }
+      last = {
+        host,
+        url,
+        error: 'Unexpected response shape',
+        sample: data
+      };
     } catch (e) {
-      last = { host: h, error: e.message, detail: e.detail || null, status: e.status || null };
+      last = {
+        host,
+        url,
+        error: e.message,
+        status: e.status || null,
+        detail: e.detail || null
+      };
     }
   }
-  throw Object.assign(new Error(last?.error || 'Binance hosts failed'), { detail: last });
+
+  throw Object.assign(new Error(last?.error || 'All Binance hosts failed'), {
+    detail: last
+  });
 }
+
 async function tryRoutes(routes) {
-  let last = null;
-  for (const r of routes) {
+  const attempts = [];
+
+  for (const route of routes) {
     try {
-      const got = await tryHosts(r.hosts, r.path, r.validator);
-      return { ...got, market: r.market, kind: r.kind };
+      const got = await tryHosts(route.hosts, route.path, route.validator);
+      return {
+        market: route.market,
+        kind: route.kind,
+        ...got,
+        attempts
+      };
     } catch (e) {
-      last = { market: r.market, kind: r.kind, error: e.message, detail: e.detail || null };
+      attempts.push({
+        market: route.market,
+        kind: route.kind,
+        error: e.message,
+        detail: e.detail || null
+      });
     }
   }
-  throw Object.assign(new Error('Binance routes failed'), { detail: last });
+
+  throw Object.assign(new Error('All Binance routes failed'), {
+    detail: attempts
+  });
 }
-function routesFor(symbol, spotPath, futuresPath, validator, kind = 'default') {
-  const futures = { market: 'futures', hosts: futuresHosts, path: futuresPath, validator, kind };
-  const spot = { market: 'spot', hosts: spotHosts, path: spotPath, validator, kind };
+
+function routesFor(symbol, spotPath, futuresPath, validator, kind) {
+  const futures = {
+    market: 'futures',
+    kind,
+    hosts: futuresHosts,
+    path: futuresPath,
+    validator
+  };
+
+  const spot = {
+    market: 'spot',
+    kind,
+    hosts: spotHosts,
+    path: spotPath,
+    validator
+  };
+
   return preferFutures(symbol) ? [futures, spot] : [spot, futures];
 }
-function bookValidator(j) {
-  return j && typeof j === 'object' && Number.isFinite(Number(j.bidPrice)) && Number.isFinite(Number(j.askPrice));
+
+function bookValidator(x) {
+  return x && typeof x === 'object'
+    && Number.isFinite(Number(x.bidPrice))
+    && Number.isFinite(Number(x.askPrice));
 }
-function priceValidator(j) {
-  return j && typeof j === 'object' && Number.isFinite(Number(j.price));
+
+function lastPriceValidator(x) {
+  return x && typeof x === 'object'
+    && Number.isFinite(Number(x.price));
 }
-function premiumValidator(j) {
-  return j && typeof j === 'object' && Number.isFinite(Number(j.markPrice));
+
+function markPriceValidator(x) {
+  return x && typeof x === 'object'
+    && Number.isFinite(Number(x.markPrice));
 }
-function arrValidator(j) { return Array.isArray(j); }
-function depthValidator(j) { return j && Array.isArray(j.bids) && Array.isArray(j.asks); }
+
+function arrayValidator(x) {
+  return Array.isArray(x);
+}
+
+function depthValidator(x) {
+  return x && Array.isArray(x.bids) && Array.isArray(x.asks);
+}
 
 module.exports = async function(req, res) {
   try {
-    if (req.method !== 'GET') return res.status(405).json({ ok: false, error: 'GET only' });
+    if (req.method !== 'GET') {
+      return json(res, 405, { ok: false, error: 'GET only' });
+    }
 
     const type = String(req.query.type || 'price').toLowerCase();
     const symbol = cleanSymbol(req.query.symbol);
+    const encoded = encodeURIComponent(symbol);
+
+    if (type === 'health') {
+      return json(res, 200, {
+        ok: true,
+        route: 'api/binance.js',
+        symbol,
+        message: 'If you see this version, Vercel is running the new file.'
+      });
+    }
 
     if (type === 'price') {
-      const encoded = encodeURIComponent(symbol);
-
-      // 1) Best: bookTicker. 2) Fallback: ticker/price. 3) Futures fallback: premiumIndex markPrice.
       const routes = [
         ...routesFor(
           symbol,
@@ -93,64 +205,77 @@ module.exports = async function(req, res) {
           symbol,
           `/api/v3/ticker/price?symbol=${encoded}`,
           `/fapi/v1/ticker/price?symbol=${encoded}`,
-          priceValidator,
+          lastPriceValidator,
           'lastPrice'
         ),
-        { market: 'futures', hosts: futuresHosts, path: `/fapi/v1/premiumIndex?symbol=${encoded}`, validator: premiumValidator, kind: 'markPrice' }
+        {
+          market: 'futures',
+          kind: 'markPrice',
+          hosts: futuresHosts,
+          path: `/fapi/v1/premiumIndex?symbol=${encoded}`,
+          validator: markPriceValidator
+        }
       ];
 
-      const { host, market, kind, data: j } = await tryRoutes(routes);
+      const result = await tryRoutes(routes);
+      const raw = result.data;
 
-      let bid, ask, mid, spread, priceSource = kind;
-      if (kind === 'bookTicker') {
-        bid = Number(j.bidPrice);
-        ask = Number(j.askPrice);
+      let bid;
+      let ask;
+      let mid;
+      let spread;
+
+      if (result.kind === 'bookTicker') {
+        bid = Number(raw.bidPrice);
+        ask = Number(raw.askPrice);
         mid = (bid + ask) / 2;
         spread = ask - bid;
-      } else if (kind === 'lastPrice') {
-        mid = Number(j.price);
+      } else if (result.kind === 'lastPrice') {
+        mid = Number(raw.price);
         bid = mid;
         ask = mid;
         spread = 0;
       } else {
-        mid = Number(j.markPrice);
+        mid = Number(raw.markPrice);
         bid = mid;
         ask = mid;
         spread = 0;
       }
 
-      res.setHeader('Cache-Control', 'no-store,max-age=0');
-      return res.status(200).json({
+      return json(res, 200, {
         ok: true,
         source: 'binance',
-        market,
-        priceSource,
-        host,
         symbol,
+        market: result.market,
+        priceSource: result.kind,
+        host: result.host,
         bid,
         ask,
         mid,
         spread,
         time: new Date().toISOString(),
-        raw: j
+        raw
       });
     }
 
     if (type === 'klines') {
       const interval = String(req.query.timeframe || '5m');
       const limit = Math.max(1, Math.min(parseInt(req.query.limit || '700', 10), 1000));
-      const qs = new URLSearchParams({ symbol, interval, limit: String(limit) });
-      if (req.query.startTime) qs.set('startTime', String(req.query.startTime));
+      const params = new URLSearchParams({ symbol, interval, limit: String(limit) });
 
-      const { host, market, data: j } = await tryRoutes(routesFor(
+      if (req.query.startTime) {
+        params.set('startTime', String(req.query.startTime));
+      }
+
+      const result = await tryRoutes(routesFor(
         symbol,
-        `/api/v3/klines?${qs}`,
-        `/fapi/v1/klines?${qs}`,
-        arrValidator,
+        `/api/v3/klines?${params}`,
+        `/fapi/v1/klines?${params}`,
+        arrayValidator,
         'klines'
       ));
 
-      const candles = j.map(k => ({
+      const candles = result.data.map(k => ({
         symbol,
         time: new Date(k[0]).toISOString(),
         open: Number(k[1]),
@@ -161,21 +286,33 @@ module.exports = async function(req, res) {
         tickVolume: Number(k[8] || k[5]),
         state: 'complete'
       })).filter(c =>
-        Number.isFinite(c.open) && Number.isFinite(c.high) &&
-        Number.isFinite(c.low) && Number.isFinite(c.close)
+        Number.isFinite(c.open)
+        && Number.isFinite(c.high)
+        && Number.isFinite(c.low)
+        && Number.isFinite(c.close)
       );
 
-      if (!candles.length) throw new Error(`No valid candles for ${symbol}`);
+      if (!candles.length) {
+        throw Object.assign(new Error(`No valid candles for ${symbol}`), {
+          detail: { market: result.market, host: result.host }
+        });
+      }
 
-      res.setHeader('Cache-Control', 'no-store,max-age=0');
-      return res.status(200).json({ ok: true, source: 'binance', market, host, symbol, timeframe: interval, candles });
+      return json(res, 200, {
+        ok: true,
+        source: 'binance',
+        symbol,
+        market: result.market,
+        host: result.host,
+        timeframe: interval,
+        candles
+      });
     }
 
     if (type === 'depth') {
       const limit = Math.max(5, Math.min(parseInt(req.query.limit || '100', 10), 500));
-      const encoded = encodeURIComponent(symbol);
 
-      const { host, market, data: j } = await tryRoutes(routesFor(
+      const result = await tryRoutes(routesFor(
         symbol,
         `/api/v3/depth?symbol=${encoded}&limit=${limit}`,
         `/fapi/v1/depth?symbol=${encoded}&limit=${limit}`,
@@ -183,18 +320,23 @@ module.exports = async function(req, res) {
         'depth'
       ));
 
-      const bids = (j.bids || []).map(x => [Number(x[0]), Number(x[1])]).filter(x => Number.isFinite(x[0]) && Number.isFinite(x[1]));
-      const asks = (j.asks || []).map(x => [Number(x[0]), Number(x[1])]).filter(x => Number.isFinite(x[0]) && Number.isFinite(x[1]));
-      const bidVolume = bids.reduce((s, x) => s + x[1], 0);
-      const askVolume = asks.reduce((s, x) => s + x[1], 0);
+      const bids = (result.data.bids || [])
+        .map(x => [Number(x[0]), Number(x[1])])
+        .filter(x => Number.isFinite(x[0]) && Number.isFinite(x[1]));
 
-      res.setHeader('Cache-Control', 'no-store,max-age=0');
-      return res.status(200).json({
+      const asks = (result.data.asks || [])
+        .map(x => [Number(x[0]), Number(x[1])])
+        .filter(x => Number.isFinite(x[0]) && Number.isFinite(x[1]));
+
+      const bidVolume = bids.reduce((sum, row) => sum + row[1], 0);
+      const askVolume = asks.reduce((sum, row) => sum + row[1], 0);
+
+      return json(res, 200, {
         ok: true,
         source: 'binance-depth',
-        market,
-        host,
         symbol,
+        market: result.market,
+        host: result.host,
         bidVolume,
         askVolume,
         bids: bids.slice(0, 30),
@@ -205,40 +347,41 @@ module.exports = async function(req, res) {
 
     if (type === 'aggtrades') {
       const limit = Math.max(1, Math.min(parseInt(req.query.limit || '800', 10), 1000));
-      const encoded = encodeURIComponent(symbol);
 
-      const { host, market, data: j } = await tryRoutes(routesFor(
+      const result = await tryRoutes(routesFor(
         symbol,
         `/api/v3/aggTrades?symbol=${encoded}&limit=${limit}`,
         `/fapi/v1/aggTrades?symbol=${encoded}&limit=${limit}`,
-        arrValidator,
+        arrayValidator,
         'aggTrades'
       ));
 
-      let buyAggVolume = 0, sellAggVolume = 0;
-      for (const t of j) {
-        const q = Number(t.q || 0);
-        if (t.m) sellAggVolume += q;
-        else buyAggVolume += q;
+      let buyAggVolume = 0;
+      let sellAggVolume = 0;
+
+      for (const trade of result.data) {
+        const qty = Number(trade.q || 0);
+        if (trade.m) sellAggVolume += qty;
+        else buyAggVolume += qty;
       }
 
-      res.setHeader('Cache-Control', 'no-store,max-age=0');
-      return res.status(200).json({
+      return json(res, 200, {
         ok: true,
         source: 'binance-aggtrades',
-        market,
-        host,
         symbol,
+        market: result.market,
+        host: result.host,
         buyAggVolume,
         sellAggVolume,
-        count: j.length,
+        count: result.data.length,
         time: new Date().toISOString()
       });
     }
 
-    return res.status(400).json({ ok: false, error: 'bad type' });
+    return json(res, 400, { ok: false, error: 'bad type', type });
+
   } catch (e) {
-    return res.status(500).json({
+    return json(res, 500, {
       ok: false,
       error: e.message || 'Binance error',
       detail: e.detail || null
