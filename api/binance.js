@@ -1,8 +1,8 @@
 // api/binance.js
 // FIX33: Binance Spot/Futures + Binance Alpha + Databento confirmation engine
-// Version marker: BINANCE_API_FIX33_DATABENTO_ENGINE_2026_07_17
+// Version marker: BINANCE_API_FIX34_DATABENTO_PRICE_SCALE_2026_07_17
 
-const VERSION = 'BINANCE_API_FIX33_DATABENTO_ENGINE_2026_07_17';
+const VERSION = 'BINANCE_API_FIX34_DATABENTO_PRICE_SCALE_2026_07_17';
 
 const spotHosts = [
   'https://api.binance.com',
@@ -442,6 +442,18 @@ function csvParseLine(line) {
   return out.map(x => x.replace(/^"|"$/g, '').trim());
 }
 
+function databentoPrice(value) {
+  let x = Number(value);
+  if (!Number.isFinite(x)) return NaN;
+  // Databento CSV often returns fixed-point prices for futures.
+  // GC values like 4218000000 mean 4218.000000, so divide by 1e6.
+  // Filter negative/zero sentinels and non-tradable rows.
+  if (x <= 0) return NaN;
+  if (Math.abs(x) > 1e7) x = x / 1e6;
+  else if (Math.abs(x) > 1e5) x = x / 1e2;
+  return x;
+}
+
 function databentoParseCsv(txt) {
   const lines = String(txt || '').trim().split(/\r?\n/).filter(Boolean);
   if (lines.length < 2) return [];
@@ -457,8 +469,10 @@ function databentoParseCsv(txt) {
   for (let i = 1; i < lines.length; i++) {
     const p = csvParseLine(lines[i]);
     const t = Date.parse(p[ti]);
-    const o = Number(p[oi]), hh = Number(p[hi]), l = Number(p[li]), c = Number(p[ci]), v = Number(p[vi] || 0);
-    if ([t, o, hh, l, c].every(Number.isFinite)) out.push({ t, time: new Date(t).toISOString(), o, h: hh, l, c, v: Number.isFinite(v) ? v : 0 });
+    const o = databentoPrice(p[oi]), hh = databentoPrice(p[hi]), l = databentoPrice(p[li]), c = databentoPrice(p[ci]), v = Number(p[vi] || 0);
+    if ([t, o, hh, l, c].every(Number.isFinite) && hh >= l) {
+      out.push({ t, time: new Date(t).toISOString(), o, h: Math.max(o, hh, l, c), l: Math.min(o, hh, l, c), c, v: Number.isFinite(v) ? v : 0 });
+    }
   }
   return out.sort((a, b) => a.t - b.t);
 }
@@ -498,9 +512,9 @@ async function databentoOhlcv(req) {
   const txt = await r.text();
   if (!r.ok) return { ok: false, source: 'databento', status: r.status, error: txt.slice(0, 500), map, start, end };
   const candles = databentoParseCsv(txt).slice(-limit);
-  if (!candles.length) return { ok: false, source: 'databento', error: 'No Databento candles parsed', raw: txt.slice(0, 300), map, start, end };
+  if (!candles.length) return { ok: false, source: 'databento', error: 'No Databento candles parsed after price-scale normalization', raw: txt.slice(0, 300), map, start, end };
 
-  return { ok: true, source: 'databento', version: VERSION, symbol, map, dataset: params.get('dataset'), dbSymbol: params.get('symbols'), schema, start, end, candles, count: candles.length };
+  return { ok: true, source: 'databento', version: VERSION, symbol, map, dataset: params.get('dataset'), dbSymbol: params.get('symbols'), schema, start, end, priceScale: 'auto fixed-point /1e6 when needed', candles, count: candles.length };
 }
 
 function databentoConfirmFromCandles(candles) {
