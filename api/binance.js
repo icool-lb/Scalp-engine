@@ -1,8 +1,8 @@
 // api/binance.js
-// FIX33: Binance Spot/Futures + Binance Alpha + Databento confirmation engine
-// Version marker: BINANCE_API_FIX34_DATABENTO_PRICE_SCALE_2026_07_17
+// FIX36: Binance Spot/Futures + Binance Alpha + Databento symbol-aware price scale
+// Version marker: BINANCE_API_FIX36_DATABENTO_SYMBOL_SCALE_2026_07_17
 
-const VERSION = 'BINANCE_API_FIX34_DATABENTO_PRICE_SCALE_2026_07_17';
+const VERSION = 'BINANCE_API_FIX36_DATABENTO_SYMBOL_SCALE_2026_07_17';
 
 const spotHosts = [
   'https://api.binance.com',
@@ -442,19 +442,37 @@ function csvParseLine(line) {
   return out.map(x => x.replace(/^"|"$/g, '').trim());
 }
 
-function databentoPrice(value) {
-  let x = Number(value);
-  if (!Number.isFinite(x)) return NaN;
-  // Databento CSV often returns fixed-point prices for futures.
-  // GC values like 4218000000 mean 4218.000000, so divide by 1e6.
-  // Filter negative/zero sentinels and non-tradable rows.
-  if (x <= 0) return NaN;
-  if (Math.abs(x) > 1e7) x = x / 1e6;
-  else if (Math.abs(x) > 1e5) x = x / 1e2;
-  return x;
+function databentoRangeFor(symbol) {
+  const s = cleanSymbol(symbol);
+  if (s === 'XAGUSD' || s === 'SI' || s === 'SI.FUT') return { min: 5, max: 100, name: 'silver' };
+  if (s === 'UKOIL' || s === 'CL' || s === 'CL.FUT') return { min: 20, max: 200, name: 'oil' };
+  if (s === 'BTCUSD' || s === 'BTCUSDT' || s === 'MBT.FUT') return { min: 1000, max: 250000, name: 'bitcoin' };
+  return { min: 500, max: 10000, name: 'gold' };
 }
 
-function databentoParseCsv(txt) {
+function databentoPrice(value, symbol) {
+  const raw = Number(value);
+  if (!Number.isFinite(raw) || raw <= 0) return NaN;
+  const range = databentoRangeFor(symbol);
+  // Databento fixed-point scale varies by schema/instrument.
+  // Try common divisors and pick the first value that sits in the expected symbol range.
+  const divs = [1, 1e2, 1e4, 1e6, 1e7, 1e8, 1e9];
+  for (const d of divs) {
+    const v = raw / d;
+    if (v >= range.min && v <= range.max) return v;
+  }
+  // Fallback: choose the closest normalized value to the symbol's middle range.
+  const mid = (range.min + range.max) / 2;
+  let best = NaN, bestDist = Infinity;
+  for (const d of divs) {
+    const v = raw / d;
+    const dist = Math.abs(Math.log(Math.max(v, 1e-9) / mid));
+    if (Number.isFinite(v) && dist < bestDist) { best = v; bestDist = dist; }
+  }
+  return best;
+}
+
+function databentoParseCsv(txt, symbol) {
   const lines = String(txt || '').trim().split(/\r?\n/).filter(Boolean);
   if (lines.length < 2) return [];
   const h = csvParseLine(lines[0]).map(x => x.toLowerCase());
@@ -469,9 +487,13 @@ function databentoParseCsv(txt) {
   for (let i = 1; i < lines.length; i++) {
     const p = csvParseLine(lines[i]);
     const t = Date.parse(p[ti]);
-    const o = databentoPrice(p[oi]), hh = databentoPrice(p[hi]), l = databentoPrice(p[li]), c = databentoPrice(p[ci]), v = Number(p[vi] || 0);
-    if ([t, o, hh, l, c].every(Number.isFinite) && hh >= l) {
-      out.push({ t, time: new Date(t).toISOString(), o, h: Math.max(o, hh, l, c), l: Math.min(o, hh, l, c), c, v: Number.isFinite(v) ? v : 0 });
+    const o = databentoPrice(p[oi], symbol), hh = databentoPrice(p[hi], symbol), l = databentoPrice(p[li], symbol), c = databentoPrice(p[ci], symbol), v = Number(p[vi] || 0);
+    if ([t, o, hh, l, c].every(Number.isFinite)) {
+      const high = Math.max(o, hh, l, c), low = Math.min(o, hh, l, c);
+      // Skip impossible rows where scaled high/low are wildly inconsistent.
+      if (high / Math.max(low, 1e-9) < 1.35) {
+        out.push({ t, time: new Date(t).toISOString(), o, h: high, l: low, c, v: Number.isFinite(v) ? v : 0 });
+      }
     }
   }
   return out.sort((a, b) => a.t - b.t);
@@ -511,10 +533,10 @@ async function databentoOhlcv(req) {
 
   const txt = await r.text();
   if (!r.ok) return { ok: false, source: 'databento', status: r.status, error: txt.slice(0, 500), map, start, end };
-  const candles = databentoParseCsv(txt).slice(-limit);
-  if (!candles.length) return { ok: false, source: 'databento', error: 'No Databento candles parsed after price-scale normalization', raw: txt.slice(0, 300), map, start, end };
+  const candles = databentoParseCsv(txt, symbol).slice(-limit);
+  if (!candles.length) return { ok: false, source: 'databento', error: 'No Databento candles parsed after symbol-aware price-scale normalization', raw: txt.slice(0, 300), map, start, end };
 
-  return { ok: true, source: 'databento', version: VERSION, symbol, map, dataset: params.get('dataset'), dbSymbol: params.get('symbols'), schema, start, end, priceScale: 'auto fixed-point /1e6 when needed', candles, count: candles.length };
+  return { ok: true, source: 'databento', version: VERSION, symbol, map, dataset: params.get('dataset'), dbSymbol: params.get('symbols'), schema, start, end, priceScale: 'symbol-aware auto fixed-point scale', candles, count: candles.length };
 }
 
 function databentoConfirmFromCandles(candles) {
