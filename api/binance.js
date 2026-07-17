@@ -1,8 +1,8 @@
 // api/binance.js
-// FIX23: Binance Spot/Futures + Binance Alpha route for BTWUSDT
-// Version marker: BINANCE_API_FIX23_ALPHA_ROUTE_2026_06_21
+// FIX33: Binance Spot/Futures + Binance Alpha + Databento confirmation engine
+// Version marker: BINANCE_API_FIX33_DATABENTO_ENGINE_2026_07_17
 
-const VERSION = 'BINANCE_API_FIX23_ALPHA_ROUTE_2026_06_21';
+const VERSION = 'BINANCE_API_FIX33_DATABENTO_ENGINE_2026_07_17';
 
 const spotHosts = [
   'https://api.binance.com',
@@ -417,6 +417,120 @@ async function normalAggTrades(symbol, limit) {
   return { ok: true, source: 'binance-aggtrades', market: r.market, host: r.host, symbol, buyAggVolume, sellAggVolume, count: r.data.length, time: new Date().toISOString() };
 }
 
+// ===== DATABENTO FIX33 =====
+// Uses Databento Historical HTTP API through the existing api/binance.js file to avoid adding a 5th Vercel function.
+// It fetches recent OHLCV-1m and derives a confirmation score. API key stays server-side in DATABENTO_API_KEY.
+function databentoMapSymbol(symbol) {
+  const s = cleanSymbol(symbol);
+  if (s === 'XAUUSD' || s === 'GC' || s === 'GC.FUT') return { dataset: 'GLBX.MDP3', dbSymbol: 'GC.FUT', stype_in: 'parent', proxy: 'GC futures proxy for XAUUSD' };
+  if (s === 'XAGUSD' || s === 'SI' || s === 'SI.FUT') return { dataset: 'GLBX.MDP3', dbSymbol: 'SI.FUT', stype_in: 'parent', proxy: 'SI futures proxy for XAGUSD' };
+  if (s === 'UKOIL' || s === 'CL' || s === 'CL.FUT') return { dataset: 'GLBX.MDP3', dbSymbol: 'CL.FUT', stype_in: 'parent', proxy: 'CL futures proxy for oil; verify Brent/WTI mapping with your broker' };
+  if (s === 'BTCUSD' || s === 'BTCUSDT') return { dataset: 'GLBX.MDP3', dbSymbol: 'MBT.FUT', stype_in: 'parent', proxy: 'Micro Bitcoin futures proxy' };
+  return { dataset: 'GLBX.MDP3', dbSymbol: 'GC.FUT', stype_in: 'parent', proxy: 'default GC futures proxy' };
+}
+
+function csvParseLine(line) {
+  const out = [];
+  let cur = '', q = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') q = !q;
+    else if (ch === ',' && !q) { out.push(cur); cur = ''; }
+    else cur += ch;
+  }
+  out.push(cur);
+  return out.map(x => x.replace(/^"|"$/g, '').trim());
+}
+
+function databentoParseCsv(txt) {
+  const lines = String(txt || '').trim().split(/\r?\n/).filter(Boolean);
+  if (lines.length < 2) return [];
+  const h = csvParseLine(lines[0]).map(x => x.toLowerCase());
+  const idx = (names) => names.map(n => h.indexOf(n)).find(i => i >= 0);
+  const ti = idx(['ts_event', 'time', 'datetime']);
+  const oi = idx(['open']);
+  const hi = idx(['high']);
+  const li = idx(['low']);
+  const ci = idx(['close']);
+  const vi = idx(['volume']);
+  const out = [];
+  for (let i = 1; i < lines.length; i++) {
+    const p = csvParseLine(lines[i]);
+    const t = Date.parse(p[ti]);
+    const o = Number(p[oi]), hh = Number(p[hi]), l = Number(p[li]), c = Number(p[ci]), v = Number(p[vi] || 0);
+    if ([t, o, hh, l, c].every(Number.isFinite)) out.push({ t, time: new Date(t).toISOString(), o, h: hh, l, c, v: Number.isFinite(v) ? v : 0 });
+  }
+  return out.sort((a, b) => a.t - b.t);
+}
+
+async function databentoOhlcv(req) {
+  const key = process.env.DATABENTO_API_KEY;
+  if (!key) return { ok: false, source: 'databento', error: 'Missing DATABENTO_API_KEY in Vercel variables' };
+
+  const symbol = cleanSymbol(req.query.symbol || 'XAUUSD');
+  const map = databentoMapSymbol(symbol);
+  const limit = Math.max(5, Math.min(Number(req.query.limit || 80), 300));
+  const mins = Math.max(30, Math.min(Number(req.query.minutes || 240), 1440));
+  const end = req.query.end || new Date(Date.now() - 25 * 60 * 60 * 1000).toISOString(); // historical service: use older-than-24h safe default
+  const start = req.query.start || new Date(Date.parse(end) - mins * 60 * 1000).toISOString();
+  const schema = String(req.query.schema || 'ohlcv-1m');
+
+  const params = new URLSearchParams({
+    dataset: String(req.query.dataset || map.dataset),
+    symbols: String(req.query.dbSymbol || map.dbSymbol),
+    stype_in: String(req.query.stype_in || map.stype_in),
+    schema,
+    start,
+    end,
+    limit: String(limit),
+    encoding: 'csv'
+  });
+
+  const url = 'https://hist.databento.com/v0/timeseries.get_range?' + params.toString();
+  const r = await fetch(url, {
+    method: 'GET',
+    headers: {
+      Authorization: 'Basic ' + Buffer.from(key + ':').toString('base64'),
+      Accept: 'text/csv'
+    }
+  });
+
+  const txt = await r.text();
+  if (!r.ok) return { ok: false, source: 'databento', status: r.status, error: txt.slice(0, 500), map, start, end };
+  const candles = databentoParseCsv(txt).slice(-limit);
+  if (!candles.length) return { ok: false, source: 'databento', error: 'No Databento candles parsed', raw: txt.slice(0, 300), map, start, end };
+
+  return { ok: true, source: 'databento', version: VERSION, symbol, map, dataset: params.get('dataset'), dbSymbol: params.get('symbols'), schema, start, end, candles, count: candles.length };
+}
+
+function databentoConfirmFromCandles(candles) {
+  const a = candles || [];
+  if (a.length < 8) return { dir: 'RANGE', score: 0, reason: 'Not enough Databento bars' };
+  const last = a[a.length - 1], prev = a[a.length - 2];
+  const recent = a.slice(-8);
+  const avgVol = recent.slice(0, -1).reduce((s, x) => s + Number(x.v || 0), 0) / Math.max(1, recent.length - 1);
+  const volRatio = avgVol ? Number(last.v || 0) / avgVol : 1;
+  const momentum = last.c - recent[0].o;
+  const range = Math.max(...recent.map(x => x.h)) - Math.min(...recent.map(x => x.l)) || 1;
+  const closePos = (last.c - last.l) / Math.max(1e-9, last.h - last.l);
+  let dir = 'RANGE', score = 45, parts = [];
+  if (momentum > range * 0.18 && closePos > 0.55) { dir = 'BUY'; score += 18; parts.push('Databento momentum BUY'); }
+  if (momentum < -range * 0.18 && closePos < 0.45) { dir = 'SELL'; score += 18; parts.push('Databento momentum SELL'); }
+  if (volRatio > 1.2) { score += 12; parts.push('Volume expansion ' + volRatio.toFixed(2) + 'x'); }
+  if (last.c > prev.c && dir === 'BUY') { score += 8; parts.push('Last bar confirms BUY'); }
+  if (last.c < prev.c && dir === 'SELL') { score += 8; parts.push('Last bar confirms SELL'); }
+  score = Math.max(0, Math.min(96, Math.round(score)));
+  return { dir, score, volRatio, lastClose: last.c, lastVolume: last.v, reason: parts.join(' | ') || 'Databento neutral' };
+}
+
+async function databentoConfirm(req) {
+  const o = await databentoOhlcv(req);
+  if (!o.ok) return o;
+  const c = databentoConfirmFromCandles(o.candles);
+  return { ...o, confirm: c };
+}
+// ===== END DATABENTO FIX33 =====
+
 module.exports = async function(req, res) {
   try {
     if (req.method !== 'GET') return json(res, 405, { ok: false, error: 'GET only' });
@@ -428,7 +542,15 @@ module.exports = async function(req, res) {
     const alpha = isAlphaWanted(symbol) || String(req.query.alpha || '') === '1';
 
     if (type === 'health') {
-      return json(res, 200, { ok: true, route: 'api/binance.js', symbol, alpha, message: 'Fix23 Alpha route active' });
+      return json(res, 200, { ok: true, route: 'api/binance.js', version: VERSION, symbol, alpha, databento: !!process.env.DATABENTO_API_KEY, message: 'Fix33 Databento route active' });
+    }
+
+    if (type === 'databento') {
+      return json(res, 200, await databentoConfirm(req));
+    }
+
+    if (type === 'databentoohlcv') {
+      return json(res, 200, await databentoOhlcv(req));
     }
 
     if (type === 'alphasymbol') {
